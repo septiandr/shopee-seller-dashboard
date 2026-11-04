@@ -1,0 +1,18 @@
+{
+  "hpp_cover": 6000,
+  "hpp_bolt": 2000,
+  "extra_bubble_cost": 0,
+  "shopee_admin_fee_pct": 8.25,
+  "shopee_process_fee_flat": 1250,
+  "shopee_gratis_ongkir_xtra_pct": 5.5,
+  "shopee_promo_auto_topup_pct": 3.33,
+  "shopee_pph22_pct": 0.5,
+  "watch_folder": "/Users/risanggalih/Downloads/penjualan",
+  "watch_folder_iklan": "/Users/risanggalih/Downloads/iklan",
+  "port": 8000,
+  "product_target_roas": {
+    "50601691171": 5.0,
+    "53251197708": 7.0,
+    "57702192586": 6.0
+  }
+}

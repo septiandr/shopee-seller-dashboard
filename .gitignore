@@ -1,0 +1,22 @@
+# Database & Sales data (protect customer privacy)
+*.db
+*.db-journal
+*.sqlite3
+*.xlsx
+
+# Python cache & environments
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+env/
+
+# OS & IDE
+.DS_Store
+.env
+.idea/
+.vscode/
+
+# Uploads directory
+uploads/*
+!uploads/.gitkeep
