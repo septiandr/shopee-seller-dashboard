@@ -481,22 +481,33 @@ def import_excel_file(file_path):
 
 def sync_watch_folder(force=False):
     """
-    Sinkronisasi seluruh file Excel di folder penjualan.
+    Sinkronisasi seluruh file Excel di folder penjualan (baik di root folder ./penjualan maupun folder konfigurasi).
     - File diproses berurutan dari yang terlama ke yang terbaru.
     - Jika ada file baru: menambah data baru ke database.
     - Jika ada pesanan dengan nomor/tanggal yang sama di file yang lebih baru: otomatis memakai data terbaru.
     - Data dari file-file sebelumnya tetap dipertahankan.
     """
     config = load_config()
-    watch_folder = config.get("watch_folder", "/Users/risanggalih/Downloads/penjualan")
-    p = Path(watch_folder)
-    if not p.exists() or not p.is_dir():
-        return {"status": "error", "message": f"Folder {watch_folder} tidak ditemukan"}
+    base_dir = Path(__file__).parent
+    configured_folder = config.get("watch_folder", str(Path.home() / "Downloads" / "penjualan"))
 
-    # Sort files chronologically so latest file takes precedence
-    excel_files = sorted(list(p.glob("*.xlsx")) + list(p.glob("*.xls")), key=os.path.getmtime)
+    candidate_dirs = [
+        base_dir / "penjualan",
+        base_dir,
+        Path(configured_folder)
+    ]
+
+    excel_files_map = {}
+    for d in candidate_dirs:
+        if d.exists() and d.is_dir():
+            for pattern in ["Order.all*.xlsx", "Order.all*.xls", "Order.*.xlsx"]:
+                for f in d.glob(pattern):
+                    if f.name not in excel_files_map:
+                        excel_files_map[f.name] = f
+
+    excel_files = sorted(list(excel_files_map.values()), key=os.path.getmtime)
     if not excel_files:
-        return {"status": "info", "message": "Tidak ada file Excel di folder penjualan"}
+        return {"status": "info", "message": "Tidak ada file Excel pesanan di folder penjualan"}
 
     results = []
     for f in excel_files:

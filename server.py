@@ -27,6 +27,11 @@ from importer_ads import (
     sync_ads_watch_folder,
     update_ad_target_roas
 )
+from importer_transaksi import (
+    init_transactions_table,
+    import_balance_report_file,
+    sync_transaksi_watch_folders
+)
 
 app = FastAPI(title="Shopee Bookkeeping & Profit Tracker")
 
@@ -45,6 +50,7 @@ UPLOADS_DIR.mkdir(exist_ok=True)
 
 init_db()
 init_ads_table()
+init_transactions_table()
 
 def init_expenses_table():
     with get_db() as conn:
@@ -944,8 +950,15 @@ def get_bookkeeping_pnl(
 
 @app.post("/api/import/sync")
 def api_sync(force: bool = False):
-    res = sync_watch_folder(force=force)
-    return res
+    res_orders = sync_watch_folder(force=force)
+    res_ads = sync_ads_watch_folder(force=force)
+    res_tx = sync_transaksi_watch_folders(force=force)
+    return {
+        "status": "success",
+        "orders": res_orders,
+        "ads": res_ads,
+        "transactions": res_tx
+    }
 
 @app.post("/api/import/upload")
 async def api_upload(file: UploadFile = File(...)):
@@ -959,6 +972,8 @@ async def api_upload(file: UploadFile = File(...)):
 
     if filename_lower.endswith(".csv") or "iklan" in filename_lower:
         res = import_ads_csv_file(save_path)
+    elif "balance" in filename_lower or "transaksi" in filename_lower or "mutasi" in filename_lower:
+        res = import_balance_report_file(save_path)
     else:
         res = import_excel_file(save_path)
     return res

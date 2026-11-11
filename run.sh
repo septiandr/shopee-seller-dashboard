@@ -19,11 +19,14 @@ if [ ! -z "$OLD_PID" ]; then
 fi
 
 # 2. Sinkronisasi data awal
-echo "1. Memeriksa file pesanan baru di ~/Downloads/penjualan/..."
-python3 importer.py >/dev/null 2>&1
+echo "1. Memeriksa file pesanan baru di ./penjualan & ~/Downloads/penjualan/..."
+python3 -c "from importer import sync_watch_folder; sync_watch_folder(force=True)" >/dev/null 2>&1
 
-echo "2. Memeriksa file iklan baru di ~/Downloads/iklan/..."
-python3 importer_ads.py >/dev/null 2>&1
+echo "2. Memeriksa file iklan baru di ./iklan & ~/Downloads/iklan/..."
+python3 -c "from importer_ads import sync_ads_watch_folder; sync_ads_watch_folder(force=True)" >/dev/null 2>&1
+
+echo "3. Memeriksa file transaksi/saldo di ./transaksi & ~/Downloads/..."
+python3 importer_transaksi.py >/dev/null 2>&1
 
 # 3. Buka browser otomatis
 BRAVE_BIN="/Applications/Brave Browser.app/Contents/MacOS/Brave Browser"

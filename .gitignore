@@ -3,6 +3,17 @@
 *.db-journal
 *.sqlite3
 *.xlsx
+*.csv
+
+# Data folders
+iklan/*
+penjualan/*
+transaksi/*
+resi/*
+!iklan/.gitkeep
+!penjualan/.gitkeep
+!transaksi/.gitkeep
+!resi/.gitkeep
 
 # Python cache & environments
 __pycache__/

@@ -76,6 +76,7 @@ def parse_num_ads(v):
 
 def import_ads_csv_file(file_path):
     init_ads_table()
+    config = load_config()
     p = Path(file_path)
     if not p.exists():
         return {"status": "error", "message": f"File {file_path} tidak ditemukan"}
@@ -258,16 +259,21 @@ def import_ads_csv_file(file_path):
 
 def sync_ads_watch_folder(force=False):
     config = load_config()
-    watch_folder = config.get("watch_folder_iklan", "/Users/risanggalih/Downloads/iklan")
-    p = Path(watch_folder)
-    if not p.exists() or not p.is_dir():
-        return {"status": "error", "message": f"Folder {watch_folder} tidak ditemukan"}
+    base_dir = Path(__file__).parent
+    configured_folder = config.get("watch_folder_iklan", str(Path.home() / "Downloads" / "iklan"))
 
-    # Also check /Users/risanggalih/Downloads/ if any ads files exist
-    downloads_p = Path("/Users/risanggalih/Downloads")
-    csv_files = list(p.glob("*.csv")) + list(p.glob("*.xlsx"))
-    if downloads_p.exists():
-        csv_files.extend(list(downloads_p.glob("Data+Keseluruhan+Iklan*.csv")))
+    candidate_dirs = [
+        base_dir / "iklan",
+        base_dir,
+        Path(configured_folder),
+        Path.home() / "Downloads"
+    ]
+
+    csv_files = []
+    for d in candidate_dirs:
+        if d.exists() and d.is_dir():
+            csv_files.extend(list(d.glob("Data+Keseluruhan+Iklan*.csv")))
+            csv_files.extend(list(d.glob("*.csv")))
 
     # Deduplicate by resolved path and sort chronologically
     unique_files = {str(f.resolve()): f for f in csv_files}.values()
