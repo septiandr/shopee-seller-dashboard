@@ -7,9 +7,9 @@
   "shopee_gratis_ongkir_xtra_pct": 5.5,
   "shopee_promo_auto_topup_pct": 3.33,
   "shopee_pph22_pct": 0.5,
-  "watch_folder": "/Users/risanggalih/Downloads/penjualan",
-  "watch_folder_iklan": "/Users/risanggalih/Downloads/iklan",
+  "watch_folder": "/Users/risanggalih/Desktop/shopee/penjualan",
   "port": 8000,
+  "watch_folder_iklan": "/Users/risanggalih/Desktop/shopee/iklan",
   "product_target_roas": {
     "50601691171": 5.0,
     "53251197708": 7.0,

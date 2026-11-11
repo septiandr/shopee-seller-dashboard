@@ -1788,31 +1788,60 @@ async function openSettingsModal() {
     const res = await fetch('/api/settings');
     const cfg = await res.json();
 
-    document.getElementById('cfgHppCover').value = cfg.hpp_cover || 6000;
-    document.getElementById('cfgHppBolt').value = cfg.hpp_bolt || 2000;
-    document.getElementById('cfgWatchFolder').value = cfg.watch_folder || '/Users/risanggalih/Downloads/penjualan';
-    document.getElementById('cfgWatchFolderIklan').value = cfg.watch_folder_iklan || '/Users/risanggalih/Downloads/iklan';
+    const elCover = document.getElementById('cfgHppCover');
+    const elBolt = document.getElementById('cfgHppBolt');
+    const elWatch = document.getElementById('cfgWatchFolder');
+    const elWatchAds = document.getElementById('cfgWatchFolderIklan') || document.getElementById('cfgWatchFolderAds');
 
-    document.getElementById('settingsModal').classList.remove('hidden');
+    if (elCover) elCover.value = cfg.hpp_cover ?? 6000;
+    if (elBolt) elBolt.value = cfg.hpp_bolt ?? 2000;
+    if (elWatch) elWatch.value = cfg.watch_folder || '/Users/risanggalih/Desktop/shopee/penjualan';
+    if (elWatchAds) elWatchAds.value = cfg.watch_folder_iklan || '/Users/risanggalih/Desktop/shopee/iklan';
+
+    const modal = document.getElementById('settingsModal');
+    if (modal) {
+      modal.classList.remove('hidden');
+      lucide.createIcons();
+    }
   } catch (err) {
-    showToast('Gagal memuat pengaturan.', 'error');
+    console.error('Error opening settings modal:', err);
+    showToast('Gagal memuat pengaturan: ' + err.message, 'error');
   }
 }
 
 function closeSettingsModal() {
-  document.getElementById('settingsModal').classList.add('hidden');
+  const modal = document.getElementById('settingsModal');
+  if (modal) modal.classList.add('hidden');
 }
 
 async function saveSettings(e) {
-  e.preventDefault();
+  if (e) e.preventDefault();
+  const elCover = document.getElementById('cfgHppCover');
+  const elBolt = document.getElementById('cfgHppBolt');
+  const elWatch = document.getElementById('cfgWatchFolder');
+  const elWatchAds = document.getElementById('cfgWatchFolderIklan') || document.getElementById('cfgWatchFolderAds');
+
+  const hppCoverVal = parseFloat(elCover ? elCover.value : 6000);
+  const hppBoltVal = parseFloat(elBolt ? elBolt.value : 2000);
+
+  if (isNaN(hppCoverVal) || hppCoverVal < 0) {
+    showToast('Nilai HPP Cover Knalpot tidak valid!', 'error');
+    return;
+  }
+  if (isNaN(hppBoltVal) || hppBoltVal < 0) {
+    showToast('Nilai HPP Baut tidak valid!', 'error');
+    return;
+  }
+
   const data = {
-    hpp_cover: parseFloat(document.getElementById('cfgHppCover').value),
-    hpp_bolt: parseFloat(document.getElementById('cfgHppBolt').value),
-    watch_folder: document.getElementById('cfgWatchFolder').value,
-    watch_folder_iklan: document.getElementById('cfgWatchFolderIklan').value
+    hpp_cover: hppCoverVal,
+    hpp_bolt: hppBoltVal,
+    watch_folder: elWatch ? elWatch.value : '',
+    watch_folder_iklan: elWatchAds ? elWatchAds.value : ''
   };
 
   try {
+    showToast('Menyimpan pengaturan HPP & menghitung ulang...', 'info');
     const res = await fetch('/api/settings', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1820,12 +1849,18 @@ async function saveSettings(e) {
     });
     const result = await res.json();
     if (result.status === 'success') {
-      showToast('Pengaturan berhasil disimpan!', 'success');
+      showToast('Pengaturan HPP berhasil disimpan & dihitung ulang!', 'success');
       closeSettingsModal();
       loadAllData();
+      if (typeof loadBookkeepingData === 'function') {
+        loadBookkeepingData();
+      }
+    } else {
+      showToast('Gagal: ' + (result.message || 'Error server'), 'error');
     }
   } catch (err) {
-    showToast('Gagal menyimpan pengaturan.', 'error');
+    console.error('Error saving settings:', err);
+    showToast('Gagal menyimpan pengaturan: ' + err.message, 'error');
   }
 }
 
