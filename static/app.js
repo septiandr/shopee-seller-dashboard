@@ -1869,22 +1869,40 @@ function exportExcel() {
   window.location.href = `/api/export?${params.toString()}`;
 }
 
-async function openShopeeSeller(event) {
+const SHOPEE_DIRECT_URLS = {
+  order: 'https://seller.shopee.co.id/portal/sale/order',
+  ads: 'https://seller.shopee.co.id/portal/marketing/pas/index?source_page_id=1&view_mode=classic&type=new_cpc_homepage',
+  finance: 'https://seller.shopee.co.id/portal/finance/wallet/shopeepay'
+};
+
+async function openShopeePage(target = 'order', event = null) {
   if (event) event.preventDefault();
+  const url = SHOPEE_DIRECT_URLS[target] || SHOPEE_DIRECT_URLS.order;
+  const labelMap = { order: 'Penjualan (Pesanan)', ads: 'Iklan Shopee', finance: 'Pemasukan (Saldo Saya)' };
+  const label = labelMap[target] || 'Shopee Seller';
+
   try {
-    showToast('Membuka Shopee Seller di Brave (sdrisanggalih)...', 'info');
-    const res = await fetch('/api/open-shopee-seller', { method: 'POST' });
+    showToast(`Membuka Shopee ${label} di Brave (sdrisanggalih)...`, 'info');
+    const res = await fetch('/api/open-shopee-url', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ target, url })
+    });
     const data = await res.json();
     if (data.status === 'success') {
       showToast(data.message, 'success');
     } else {
-      window.open('https://seller.shopee.co.id/portal/marketing/pas/index?source_page_id=1&from=1793725200&to=1793811599&type=new_cpc_homepage&group=today&view_mode=classic', '_blank');
+      window.open(url, '_blank');
     }
   } catch (err) {
-    window.open('https://seller.shopee.co.id/portal/marketing/pas/index?source_page_id=1&from=1793725200&to=1793811599&type=new_cpc_homepage&group=today&view_mode=classic', '_blank');
+    window.open(url, '_blank');
   }
 }
 
+async function openShopeeSeller(event) {
+  return openShopeePage('ads', event);
+}
+
 async function launchBraveDirectly() {
-  return openShopeeSeller();
+  return openShopeePage('ads');
 }

@@ -132,20 +132,43 @@
         </div>
       </div>
 
-      <!-- Action Buttons -->
+      <!-- Action Buttons & Direct Shopee Links -->
       <div class="flex items-center gap-2">
-        <a href="https://seller.shopee.co.id/portal/marketing/pas/index?source_page_id=1&from=1793725200&to=1793811599&type=new_cpc_homepage&group=today&view_mode=classic" 
-           target="_blank" 
-           rel="noopener noreferrer" 
-           onclick="openShopeeSeller(event)"
-           class="btn-tactile flex items-center gap-1.5 px-3 py-2 text-xs font-bold rounded-lg bg-orange-50 text-orange-700 border border-orange-200 hover:bg-orange-100 hover:border-orange-300 shadow-sm" 
-           title="Buka Dashboard Iklan Shopee Seller di Brave (Profile: sdrisanggalih)">
-          <i data-lucide="external-link" class="w-3.5 h-3.5 text-orange-600"></i>
-          <span class="hidden sm:inline">Shopee Seller Ads</span>
-          <span class="sm:hidden">Iklan</span>
-        </a>
+        
+        <!-- Direct Shopee Seller Shortcut Buttons -->
+        <div class="flex items-center bg-slate-100 p-0.5 rounded-xl border border-slate-200 text-xs">
+          <a href="https://seller.shopee.co.id/portal/sale/order" 
+             target="_blank" 
+             rel="noopener noreferrer" 
+             onclick="openShopeePage('order', event)"
+             class="btn-tactile px-2.5 py-1.5 rounded-lg text-slate-700 hover:text-amber-700 hover:bg-white transition font-bold flex items-center gap-1.5" 
+             title="Buka Halaman Penjualan / Pesanan Shopee (Brave: sdrisanggalih)">
+            <i data-lucide="shopping-bag" class="w-3.5 h-3.5 text-amber-600"></i>
+            <span class="hidden sm:inline">Penjualan</span>
+          </a>
 
-        <button id="btnSyncFolder" onclick="syncAllData()" class="btn-tactile flex items-center gap-2 px-3 sm:px-3.5 py-2 text-xs font-bold rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 shadow-sm">
+          <a href="https://seller.shopee.co.id/portal/marketing/pas/index?source_page_id=1&view_mode=classic&type=new_cpc_homepage" 
+             target="_blank" 
+             rel="noopener noreferrer" 
+             onclick="openShopeePage('ads', event)"
+             class="btn-tactile px-2.5 py-1.5 rounded-lg text-slate-700 hover:text-orange-700 hover:bg-white transition font-bold flex items-center gap-1.5" 
+             title="Buka Halaman Iklan Shopee (Brave: sdrisanggalih)">
+            <i data-lucide="target" class="w-3.5 h-3.5 text-orange-600"></i>
+            <span class="hidden sm:inline">Iklan</span>
+          </a>
+
+          <a href="https://seller.shopee.co.id/portal/finance/wallet/shopeepay" 
+             target="_blank" 
+             rel="noopener noreferrer" 
+             onclick="openShopeePage('finance', event)"
+             class="btn-tactile px-2.5 py-1.5 rounded-lg text-slate-700 hover:text-emerald-700 hover:bg-white transition font-bold flex items-center gap-1.5" 
+             title="Buka Halaman Pemasukan / Saldo Shopee (Brave: sdrisanggalih)">
+            <i data-lucide="wallet" class="w-3.5 h-3.5 text-emerald-600"></i>
+            <span class="hidden sm:inline">Pemasukan</span>
+          </a>
+        </div>
+
+        <button id="btnSyncFolder" onclick="syncAllData()" class="btn-tactile flex items-center gap-2 px-3 sm:px-3.5 py-2 text-xs font-bold rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 shadow-sm" title="Sinkronkan data dari folder">
           <i data-lucide="refresh-cw" class="w-3.5 h-3.5" id="iconSync"></i>
           <span class="hidden md:inline">Sinkronkan Folder</span>
         </button>
@@ -199,6 +222,28 @@
     <!-- ==================== TAB 1: PEMBUKUAN & ANALITIK PESANAN ==================== -->
     <div id="tabContentOrders" class="space-y-6">
       
+      <!-- Top Action Bar for Orders -->
+      <div class="flex flex-wrap items-center justify-between gap-3 p-4 rounded-2xl bg-amber-50/70 border border-amber-200">
+        <div>
+          <h2 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+            <i data-lucide="shopping-bag" class="w-4 h-4 text-amber-600"></i>
+            Analitik & Pembukuan Pesanan Shopee
+          </h2>
+          <p class="text-xs text-slate-600">Pantau performa penjualan, pesanan masuk, omzet, dan margin laba bersih produk.</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <a href="https://seller.shopee.co.id/portal/sale/order" 
+             target="_blank" 
+             rel="noopener noreferrer" 
+             onclick="openShopeePage('order', event)"
+             class="btn-tactile flex items-center gap-2 px-3.5 py-2 text-xs font-bold rounded-lg bg-amber-500 text-white hover:bg-amber-600 shadow-sm shadow-amber-500/25"
+             title="Buka Halaman Penjualan / Pesanan Shopee di Brave Browser (Profile: sdrisanggalih)">
+            <i data-lucide="external-link" class="w-4 h-4"></i>
+            <span>Buka Shopee Penjualan (Brave: sdrisanggalih)</span>
+          </a>
+        </div>
+      </div>
+
       <!-- 6 Quick Insight Pills (Hari Laris, Jam Laris, Bulan Laris, Kota Laris, Produk Top, Varian Top) -->
       <section class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
         <div class="card-ribbon-light p-3 flex items-center gap-2.5">
@@ -594,6 +639,15 @@
           <p class="text-xs text-slate-600">Catat biaya operasional (iklan, bubble wrap, lakban, gaji, transport) untuk melihat Laba Bersih Akhir Bisnis.</p>
         </div>
         <div class="flex items-center gap-2">
+          <a href="https://seller.shopee.co.id/portal/finance/wallet/shopeepay" 
+             target="_blank" 
+             rel="noopener noreferrer" 
+             onclick="openShopeePage('finance', event)"
+             class="btn-tactile flex items-center gap-2 px-3.5 py-2 text-xs font-bold rounded-lg bg-white text-emerald-700 border border-emerald-300 hover:bg-emerald-100 shadow-sm"
+             title="Buka Halaman Pemasukan / Saldo ShopeePay di Brave (Profile: sdrisanggalih)">
+            <i data-lucide="wallet" class="w-4 h-4 text-emerald-600"></i>
+            <span>Buka Shopee Pemasukan (Brave)</span>
+          </a>
           <button onclick="openExpenseModal()" class="btn-tactile flex items-center gap-2 px-3.5 py-2 text-xs font-bold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm">
             <i data-lucide="plus" class="w-4 h-4 stroke-[2.5]"></i>
             <span>Catat Biaya Baru</span>
@@ -866,14 +920,14 @@
           <p class="text-xs text-slate-600">Data tersinkron otomatis dari file CSV di folder <code class="text-amber-800 font-semibold">~/Downloads/iklan/</code>.</p>
         </div>
         <div class="flex items-center gap-2">
-          <a href="https://seller.shopee.co.id/portal/marketing/pas/index?source_page_id=1&from=1793725200&to=1793811599&type=new_cpc_homepage&group=today&view_mode=classic" 
+          <a href="https://seller.shopee.co.id/portal/marketing/pas/index?source_page_id=1&view_mode=classic&type=new_cpc_homepage" 
              target="_blank" 
              rel="noopener noreferrer" 
-             onclick="openShopeeSeller(event)"
+             onclick="openShopeePage('ads', event)"
              class="btn-tactile flex items-center gap-2 px-3.5 py-2 text-xs font-bold rounded-lg bg-orange-600 text-white hover:bg-orange-700 shadow-sm shadow-orange-500/25"
-             title="Buka Iklan Shopee Seller di Brave Browser (Profile: sdrisanggalih)">
-            <i data-lucide="external-link" class="w-4 h-4"></i>
-            <span>Buka Shopee Seller Ads (Brave: sdrisanggalih)</span>
+             title="Buka Halaman Iklan Shopee di Brave Browser (Profile: sdrisanggalih)">
+            <i data-lucide="target" class="w-4 h-4"></i>
+            <span>Buka Shopee Iklan (Brave: sdrisanggalih)</span>
           </a>
           <button onclick="syncAdsData()" class="btn-tactile flex items-center gap-2 px-3.5 py-2 text-xs font-bold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm">
             <i data-lucide="refresh-cw" class="w-4 h-4" id="iconSyncAds"></i>

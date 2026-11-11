@@ -1090,7 +1090,11 @@ def api_export(
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
 
-SHOPEE_ADS_SELLER_URL = "https://seller.shopee.co.id/portal/marketing/pas/index?source_page_id=1&from=1793725200&to=1793811599&type=new_cpc_homepage&group=today&view_mode=classic"
+SHOPEE_URLS = {
+    "order": "https://seller.shopee.co.id/portal/sale/order",
+    "ads": "https://seller.shopee.co.id/portal/marketing/pas/index?source_page_id=1&view_mode=classic&type=new_cpc_homepage",
+    "finance": "https://seller.shopee.co.id/portal/finance/wallet/shopeepay"
+}
 
 def get_brave_profile_dir(profile_name="sdrisanggalih") -> str:
     local_state_file = Path.home() / "Library/Application Support/BraveSoftware/Brave-Browser/Local State"
@@ -1107,26 +1111,32 @@ def get_brave_profile_dir(profile_name="sdrisanggalih") -> str:
             pass
     return "Profile 9"
 
-@app.post("/api/open-shopee-seller")
-def open_shopee_seller_brave():
+@app.post("/api/open-shopee-url")
+def open_shopee_url_brave(data: dict):
+    target = data.get("target", "order")
+    url = SHOPEE_URLS.get(target, data.get("url", SHOPEE_URLS["order"]))
+
     import subprocess
     try:
         brave_bin = Path("/Applications/Brave Browser.app/Contents/MacOS/Brave Browser")
         profile_dir = get_brave_profile_dir("sdrisanggalih")
         if brave_bin.exists():
-            # Invoke Brave binary directly so Chromium internal IPC opens the exact profile window
             subprocess.Popen([
                 str(brave_bin),
                 f"--profile-directory={profile_dir}",
-                SHOPEE_ADS_SELLER_URL
+                url
             ])
             subprocess.Popen(["open", "-a", "Brave Browser"])
-            return {"status": "success", "message": f"Berhasil membuka Shopee Seller di Brave (Profile: sdrisanggalih)"}
+            return {"status": "success", "message": f"Berhasil membuka Shopee ({target}) di Brave (Profile: sdrisanggalih)"}
         else:
-            subprocess.Popen(["open", SHOPEE_ADS_SELLER_URL])
-            return {"status": "success", "message": "Berhasil membuka Shopee Seller Ads di browser utama"}
+            subprocess.Popen(["open", url])
+            return {"status": "success", "message": "Berhasil membuka Shopee di browser utama"}
     except Exception as e:
         return {"status": "error", "message": str(e)}
+
+@app.post("/api/open-shopee-seller")
+def open_shopee_seller_brave():
+    return open_shopee_url_brave({"target": "ads"})
 
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
