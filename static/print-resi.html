@@ -225,6 +225,133 @@
       color: #3730a3;
     }
 
+    /* Scanner Banner */
+    .scanner-banner {
+      margin-top: 10px;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .scanner-banner.safe {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      color: #166534;
+    }
+
+    .scanner-banner.warning {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #991b1b;
+      animation: pulse-border 2s infinite;
+    }
+
+    @keyframes pulse-border {
+      0%, 100% { border-color: #fecaca; }
+      50% { border-color: #ef4444; }
+    }
+
+    .scanner-status-text {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .scanner-status-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .scanner-banner.safe .scanner-status-badge {
+      background: #dcfce7;
+      color: #15803d;
+    }
+
+    .scanner-banner.warning .scanner-status-badge {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    .toggle-skip-dup {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .toggle-skip-dup input {
+      accent-color: #dc2626;
+      cursor: pointer;
+    }
+
+    /* Duplicate Page Overlay & Styling */
+    .duplicate-warning-banner {
+      background: #fff1f2;
+      border: 2px dashed #e11d48;
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin: 10px 12px;
+      color: #881337;
+      text-align: left;
+    }
+
+    .dup-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-weight: 800;
+      font-size: 13px;
+      color: #be123c;
+    }
+
+    .dup-detail {
+      font-size: 11px;
+      margin-top: 6px;
+      line-height: 1.4;
+      color: #4c0519;
+    }
+
+    .btn-force-page {
+      background: #be123c;
+      color: #ffffff;
+      border: none;
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn-force-page:hover {
+      background: #9f1239;
+    }
+
+    .btn-force-page.active-forced {
+      background: #475569;
+    }
+
+    .paper-page.is-duplicate-skipped {
+      opacity: 0.65;
+      filter: grayscale(1);
+      position: relative;
+    }
+
     .page-separator {
       height: 32px;
       display: flex;
@@ -268,6 +395,11 @@
       }
 
       .no-print {
+        display: none !important;
+      }
+
+      /* HILANGKAN RESI DUPLIKAT DARI HASIL CETAK FISIK */
+      .paper-page.is-duplicate-skipped {
         display: none !important;
       }
 
@@ -356,6 +488,18 @@
         </select>
       </div>
     </div>
+
+    <!-- Scanner Anti-Double Print Banner -->
+    <div id="scannerBanner" class="scanner-banner safe">
+      <div class="scanner-status-text">
+        <span class="scanner-status-badge" id="scannerBadge">SCANNER ANTI-DOBEL</span>
+        <span id="scannerMsg">Memindai resi untuk mendeteksi nomor ganda/duplikat...</span>
+      </div>
+      <label class="toggle-skip-dup" title="Otomatis lewati halaman resi yang kembar agar tidak tercetak dua kali">
+        <input type="checkbox" id="checkSkipDup" checked onchange="updatePreview()">
+        <span>🛡️ Lewati Resi Duplikat Otomatis</span>
+      </label>
+    </div>
   </div>
 
   <!-- Thermal Paper 80mm Roll Container -->
@@ -379,10 +523,20 @@
     document.getElementById('selectStyle').value = initialStyle;
 
     let totalPages = 1;
+    let scanData = { has_duplicates: false, duplicate_pages: [], pages: [] };
+    const forcedPages = new Set(); // Pages user explicitly overrides to print
 
-    // Load available pages count for this resi
+    // Scan duplicates and load available pages count for this resi
     async function initPageList() {
       try {
+        // 1. Scan for duplicates via API
+        const scanRes = await fetch(`/api/resi/scan/${encodeURIComponent(filename)}`);
+        if (scanRes.ok) {
+          scanData = await scanRes.json();
+          renderScannerStatus();
+        }
+
+        // 2. Load file info
         const res = await fetch('/api/resi/files');
         const data = await res.json();
         const cur = (data.files || []).find(f => f.filename === filename);
@@ -403,7 +557,9 @@
             for (let p = 1; p <= totalPages; p++) {
               const opt = document.createElement('option');
               opt.value = p;
-              opt.textContent = `Halaman ${p} Saja`;
+              const pMeta = (scanData.pages || []).find(pg => pg.page === p);
+              const dupTag = (pMeta && pMeta.is_duplicate) ? ' ⚠️ [DUPLIKAT]' : '';
+              opt.textContent = `Halaman ${p}${dupTag}`;
               sel.appendChild(opt);
             }
           }
@@ -413,11 +569,38 @@
       }
     }
 
+    function renderScannerStatus() {
+      const banner = document.getElementById('scannerBanner');
+      const badge = document.getElementById('scannerBadge');
+      const msg = document.getElementById('scannerMsg');
+
+      if (scanData.has_duplicates) {
+        banner.className = 'scanner-banner warning';
+        badge.textContent = '⚠️ DUPLIKAT DITEMUKAN';
+        const dupPagesList = scanData.duplicate_pages.map(p => `Hal ${p}`).join(', ');
+        msg.innerHTML = `Terdeteksi <strong>${scanData.duplicate_count} resi kembar</strong> (${dupPagesList})! Otomatis dilewati agar tidak ter-print double.`;
+      } else {
+        banner.className = 'scanner-banner safe';
+        badge.textContent = '✓ 100% AMAN';
+        msg.textContent = `Semua resi unik. Tidak ada nomor resi atau pesanan yang kembar/ganda.`;
+      }
+    }
+
+    function toggleForcePage(pageNum) {
+      if (forcedPages.has(pageNum)) {
+        forcedPages.delete(pageNum);
+      } else {
+        forcedPages.add(pageNum);
+      }
+      updatePreview();
+    }
+
     function updatePreview() {
       const card = document.getElementById('checkCard').checked ? 1 : 0;
       const style = document.getElementById('selectStyle').value || 1;
       const threshold = document.getElementById('selectThreshold').value;
       const pageSelection = document.getElementById('selectPage').value || 'all';
+      const skipDup = document.getElementById('checkSkipDup').checked;
       
       const container = document.getElementById('paperPagesContainer');
       const overlay = document.getElementById('loadingOverlay');
@@ -432,6 +615,11 @@
       const totalToLoad = pagesToRender.length;
 
       pagesToRender.forEach((p, idx) => {
+        const pMeta = (scanData.pages || []).find(pg => pg.page === p) || {};
+        const isDuplicate = Boolean(pMeta.is_duplicate);
+        const isForced = forcedPages.has(p);
+        const shouldSkip = isDuplicate && skipDup && !isForced;
+
         if (idx > 0) {
           const sep = document.createElement('div');
           sep.className = 'page-separator no-print';
@@ -440,7 +628,27 @@
         }
 
         const pageWrap = document.createElement('div');
-        pageWrap.className = 'paper-page';
+        pageWrap.className = 'paper-page' + (shouldSkip ? ' is-duplicate-skipped' : '');
+        pageWrap.id = `pageWrap_${p}`;
+
+        // Jika halaman ini terdeteksi duplikat, tampilkan kotak peringatan
+        if (isDuplicate) {
+          const dupBox = document.createElement('div');
+          dupBox.className = 'duplicate-warning-banner no-print';
+          dupBox.innerHTML = `
+            <div class="dup-header">
+              <span>${shouldSkip ? '🚫 RESI DUPLIKAT DILEWATI (ANTI-DOUBLE PRINT)' : '⚠️ RESI DUPLIKAT (CETAK DIPAKSAKAN)'}</span>
+              <button class="btn-force-page ${isForced ? 'active-forced' : ''}" onclick="toggleForcePage(${p})">
+                ${isForced ? 'Batalkan Paksa' : 'Tetap Cetak Halaman Ini'}
+              </button>
+            </div>
+            <div class="dup-detail">
+              <strong>Penyebab:</strong> ${pMeta.duplicate_reason || 'Nomor resi sama dengan halaman sebelumnya'}<br>
+              <strong>Penerima:</strong> ${pMeta.recipient} | <strong>No. Resi:</strong> ${pMeta.tracking_no}
+            </div>
+          `;
+          pageWrap.appendChild(dupBox);
+        }
 
         const img = document.createElement('img');
         img.alt = `Resi Hal ${p}`;

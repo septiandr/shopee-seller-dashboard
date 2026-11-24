@@ -1245,6 +1245,106 @@ def api_resi_files():
         files.append(info)
     return {"status": "success", "files": files}
 
+def scan_pdf_duplicates(pdf_path: Path, check_other_files: bool = True):
+    import re, pypdf
+    if not pdf_path.exists():
+        return {"status": "error", "message": f"File {pdf_path.name} tidak ditemukan"}
+
+    reader = pypdf.PdfReader(str(pdf_path))
+    pages_meta = []
+    seen_tracking = {}
+    seen_order = {}
+    duplicate_pages = []
+
+    # Map tracking numbers dari file resi lain untuk deteksi silang
+    other_files_tracking = {}
+    if check_other_files:
+        for other_p in RESI_DIR.glob("*.pdf"):
+            if other_p.name == pdf_path.name:
+                continue
+            try:
+                other_reader = pypdf.PdfReader(str(other_p))
+                for o_idx, o_page in enumerate(other_reader.pages):
+                    t = o_page.extract_text() or ""
+                    for spx in re.findall(r'SPX[A-Z0-9]{10,16}', t):
+                        if spx not in other_files_tracking:
+                            other_files_tracking[spx] = f"{other_p.name} (Hal {o_idx + 1})"
+            except Exception:
+                pass
+
+    for idx, page in enumerate(reader.pages):
+        page_num = idx + 1
+        text = page.extract_text() or ""
+        spx = re.findall(r'SPX[A-Z0-9]{10,16}', text)
+        tracking_no = spx[0] if spx else f"HALAMAN_{page_num}"
+        
+        ord_matches = re.findall(r'26[0-9A-Z]{11,14}', text)
+        order_no = ord_matches[0] if ord_matches else ""
+        
+        recipient = "-"
+        lines = text.split("\n")
+        for i, l in enumerate(lines):
+            if "Penerima:" in l:
+                for off in [2, 1, 3]:
+                    if i + off < len(lines):
+                        cand = lines[i + off].strip()
+                        if cand and not cand.isdigit() and len(cand) > 2:
+                            recipient = cand
+                            break
+                if recipient != "-":
+                    break
+
+        is_dup = False
+        reason = ""
+        other_file_match = ""
+
+        # Cek duplikat dalam file yang sama
+        if tracking_no and tracking_no in seen_tracking and not tracking_no.startswith("HALAMAN_"):
+            is_dup = True
+            reason = f"Nomor resi {tracking_no} sama dengan Halaman {seen_tracking[tracking_no]}"
+        elif order_no and order_no in seen_order:
+            is_dup = True
+            reason = f"Nomor pesanan {order_no} sama dengan Halaman {seen_order[order_no]}"
+        else:
+            if tracking_no and not tracking_no.startswith("HALAMAN_"):
+                seen_tracking[tracking_no] = page_num
+            if order_no:
+                seen_order[order_no] = page_num
+
+        # Cek jika ada di file PDF lain
+        if tracking_no in other_files_tracking:
+            other_file_match = other_files_tracking[tracking_no]
+
+        if is_dup:
+            duplicate_pages.append(page_num)
+
+        pages_meta.append({
+            "page": page_num,
+            "tracking_no": tracking_no,
+            "order_no": order_no,
+            "recipient": recipient,
+            "is_duplicate": is_dup,
+            "duplicate_reason": reason,
+            "other_file_match": other_file_match
+        })
+
+    return {
+        "status": "success",
+        "filename": pdf_path.name,
+        "total_pages": len(reader.pages),
+        "has_duplicates": len(duplicate_pages) > 0,
+        "duplicate_count": len(duplicate_pages),
+        "duplicate_pages": duplicate_pages,
+        "pages": pages_meta
+    }
+
+@app.get("/api/resi/scan/{filename}")
+def api_resi_scan(filename: str):
+    pdf_path = RESI_DIR / filename
+    if not pdf_path.exists():
+        raise HTTPException(status_code=404, detail="File resi tidak ditemukan")
+    return scan_pdf_duplicates(pdf_path, check_other_files=True)
+
 def draw_star_polygon(draw, cx: float, cy: float, r_outer: float, r_inner: float, fill: int = 255, outline=None):
     import math
     points = []
