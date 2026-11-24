@@ -24,6 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
   lucide.createIcons();
   setupDropZone();
   loadAllData();
+  loadResiStatus();
 });
 
 function formatRp(val) {
@@ -238,6 +239,14 @@ async function loadOrders() {
 
       const deductionTooltip = `Admin 8.25%: -${formatRp(o.shopee_admin_fee)} | Proses: -${formatRp(o.shopee_process_fee)} | Ongkir XTRA 5.5%: -${formatRp(o.shopee_gratis_ongkir_xtra)} | Iklan 3.33%: -${formatRp(o.shopee_promo_fee)} | PPh 0.5%: -${formatRp(o.shopee_pph22)}`;
 
+      const matchedResi = (window.availableResiFiles || []).find(rf => 
+        (rf.order_no && rf.order_no !== '-' && o.order_no && o.order_no.includes(rf.order_no)) ||
+        (rf.tracking_no && rf.tracking_no !== '-' && o.tracking_no && o.tracking_no.includes(rf.tracking_no))
+      );
+      const resiPrintBtn = matchedResi
+        ? `<button onclick="printResiBle('${escapeHtml(matchedResi.filename)}', event)" class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 mt-1 ml-1" title="Cetak label resi ${escapeHtml(matchedResi.filename)} ke Printer BLE"><i data-lucide="printer" class="w-3 h-3"></i> Cetak Resi</button>`
+        : '';
+
       return `
         <tr class="hover:bg-slate-50 transition group">
           <td class="py-3.5 px-4">
@@ -245,9 +254,12 @@ async function loadOrders() {
             <div class="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5">
               ${o.tracking_no ? `<span class="text-slate-600 font-mono-num">${o.tracking_no}</span>` : '<span>-</span>'}
             </div>
-            <span class="inline-block mt-1 px-2 py-0.5 rounded-full text-[9px] font-semibold border ${statusColor}">
-              ${o.order_status || '-'}
-            </span>
+            <div class="flex items-center flex-wrap gap-1 mt-1">
+              <span class="inline-block px-2 py-0.5 rounded-full text-[9px] font-semibold border ${statusColor}">
+                ${o.order_status || '-'}
+              </span>
+              ${resiPrintBtn}
+            </div>
           </td>
 
           <td class="py-3.5 px-4">
@@ -1905,4 +1917,213 @@ async function openShopeeSeller(event) {
 
 async function launchBraveDirectly() {
   return openShopeePage('ads');
+}
+
+// ==============================================================
+// RESI-PRINTER THERMAL BLE INTEGRATION
+// ==============================================================
+window.availableResiFiles = [];
+
+async function loadResiStatus() {
+  try {
+    const res = await fetch('/api/resi/status');
+    const data = await res.json();
+    const dot = document.getElementById('resiStatusDot');
+    const badge = document.getElementById('resiStatusBadge');
+    const devLabel = document.getElementById('resiDeviceLabel');
+    const paperWidth = document.getElementById('resiPaperWidth');
+    const tabBadge = document.getElementById('badgeResiCountTab');
+
+    if (tabBadge && data.resi_files_count !== undefined) {
+      tabBadge.textContent = data.resi_files_count;
+    }
+
+    if (data.online) {
+      if (dot) dot.className = 'w-2 h-2 rounded-full bg-emerald-500 animate-pulse';
+      if (badge) {
+        badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 flex items-center gap-1';
+        badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span> Online (Port 8137)';
+      }
+      if (data.printer && data.printer.profiles && data.printer.profiles.length > 0) {
+        const prof = data.printer.profiles[0];
+        if (devLabel) devLabel.textContent = `${prof.label || prof.name} (Bluetooth BLE)`;
+      }
+      if (paperWidth && data.printer && data.printer.paper) {
+        paperWidth.textContent = `${data.printer.paper}mm (576 dots)`;
+      }
+    } else {
+      if (dot) dot.className = 'w-2 h-2 rounded-full bg-slate-400';
+      if (badge) {
+        badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 flex items-center gap-1';
+        badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-amber-600"></span> Server Siap Dijalankan';
+      }
+    }
+  } catch (err) {
+    console.error('Gagal membaca status resi printer:', err);
+  }
+}
+
+async function loadResiFiles() {
+  const tbody = document.getElementById('resiFilesTableBody');
+  const summaryEl = document.getElementById('resiFilesSummary');
+  const icon = document.getElementById('iconResiRefresh');
+  if (icon) icon.classList.add('animate-spin');
+
+  try {
+    const res = await fetch('/api/resi/files');
+    const data = await res.json();
+    window.availableResiFiles = data.files || [];
+
+    if (summaryEl) {
+      summaryEl.textContent = `${window.availableResiFiles.length} file resi tersedia di folder resi/`;
+    }
+    const tabBadge = document.getElementById('badgeResiCountTab');
+    if (tabBadge) tabBadge.textContent = window.availableResiFiles.length;
+
+    if (!window.availableResiFiles || window.availableResiFiles.length === 0) {
+      if (tbody) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="py-8 text-center text-slate-400">
+              Belum ada file resi PDF di folder resi/. Silakan upload file resi dari Shopee.
+            </td>
+          </tr>
+        `;
+      }
+      return;
+    }
+
+    if (tbody) {
+      tbody.innerHTML = window.availableResiFiles.map(rf => {
+        return `
+          <tr class="hover:bg-slate-50 transition">
+            <td class="py-2.5 px-3">
+              <div class="font-bold text-slate-900 flex items-center gap-1.5">
+                <i data-lucide="file-text" class="w-3.5 h-3.5 text-indigo-500 shrink-0"></i>
+                <span>${escapeHtml(rf.filename)}</span>
+              </div>
+              <span class="text-[10px] text-slate-400 font-mono-num">${rf.size_kb} KB • ${rf.mtime}</span>
+            </td>
+            <td class="py-2.5 px-3">
+              <span class="font-mono-num font-bold text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-200">
+                ${escapeHtml(rf.tracking_no || '-')}
+              </span>
+            </td>
+            <td class="py-2.5 px-3">
+              <span class="font-mono-num text-slate-800 font-medium">
+                ${escapeHtml(rf.order_no || '-')}
+              </span>
+            </td>
+            <td class="py-2.5 px-3">
+              <div class="truncate max-w-[130px] font-medium text-slate-700" title="${escapeHtml(rf.recipient)}">
+                ${escapeHtml(rf.recipient || '-')}
+              </div>
+            </td>
+            <td class="py-2.5 px-3 text-center">
+              <span class="px-1.5 py-0.5 rounded text-[10px] bg-slate-100 text-slate-700 font-semibold">${rf.pages} hal</span>
+            </td>
+            <td class="py-2.5 px-3 text-right">
+              <div class="flex items-center justify-end gap-1.5">
+                <button onclick="printResiBle('${escapeHtml(rf.filename)}')" 
+                        class="btn-tactile px-2.5 py-1 text-xs font-bold rounded bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm flex items-center gap-1"
+                        title="Cetak langsung ke printer Bluetooth (RPP02N)">
+                  <i data-lucide="printer" class="w-3 h-3"></i>
+                  <span>Cetak BLE</span>
+                </button>
+                <a href="/api/resi/pdf/${encodeURIComponent(rf.filename)}" target="_blank" 
+                   class="btn-tactile px-2 py-1 text-xs rounded border border-slate-200 text-slate-600 hover:bg-slate-100 flex items-center gap-1"
+                   title="Buka / Unduh File PDF Asli">
+                  <i data-lucide="eye" class="w-3 h-3"></i>
+                </a>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+      lucide.createIcons();
+    }
+  } catch (err) {
+    console.error('Gagal memuat daftar file resi:', err);
+    if (tbody) {
+      tbody.innerHTML = `<tr><td colspan="6" class="py-4 text-center text-rose-500">Gagal memuat resi: ${escapeHtml(err.message)}</td></tr>`;
+    }
+  } finally {
+    if (icon) icon.classList.remove('animate-spin');
+  }
+}
+
+async function printResiBle(filename, event = null) {
+  if (event) event.stopPropagation();
+  try {
+    showToast(`Mengirim resi ${filename} ke printer Bluetooth BLE (RPP02N)...`, 'info');
+    const res = await fetch('/api/resi/print', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ filename })
+    });
+    const data = await res.json();
+    if (data.status === 'success') {
+      showToast(`Berhasil! ${data.message}`, 'success');
+    } else {
+      showToast(`Gagal: ${data.message}`, 'error');
+    }
+  } catch (err) {
+    showToast(`Error cetak resi: ${err.message}`, 'error');
+  }
+}
+
+async function openResiWebUI() {
+  try {
+    showToast('Membuka Platform Resi Printer di browser...', 'info');
+    const res = await fetch('/api/resi/open-web', { method: 'POST' });
+    const data = await res.json();
+    if (data.status !== 'success') {
+      window.open('http://127.0.0.1:8137', '_blank');
+    }
+  } catch (err) {
+    window.open('http://127.0.0.1:8137', '_blank');
+  }
+}
+
+async function uploadResiFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const formData = new FormData();
+  formData.append('file', file);
+
+  try {
+    showToast(`Mengunggah resi ${file.name}...`, 'info');
+    const res = await fetch('/api/resi/upload', {
+      method: 'POST',
+      body: formData
+    });
+    const data = await res.json();
+    if (data.status === 'success') {
+      showToast(data.message, 'success');
+      loadResiFiles();
+    } else {
+      showToast(data.message, 'error');
+    }
+  } catch (err) {
+    showToast(`Error upload resi: ${err.message}`, 'error');
+  } finally {
+    event.target.value = '';
+  }
+}
+
+function openResiModal() {
+  const modal = document.getElementById('resiModal');
+  if (modal) {
+    modal.classList.remove('hidden');
+    loadResiStatus();
+    loadResiFiles();
+  }
+}
+
+function closeResiModal() {
+  const modal = document.getElementById('resiModal');
+  if (modal) {
+    modal.classList.add('hidden');
+  }
 }

@@ -1138,6 +1138,173 @@ def open_shopee_url_brave(data: dict):
 def open_shopee_seller_brave():
     return open_shopee_url_brave({"target": "ads"})
 
+# ==============================================================
+# RESI-PRINTER THERMAL BLE INTEGRATION
+# ==============================================================
+RESI_DIR = BASE_DIR / "resi"
+RESI_PRINTER_DIR = Path("/Users/risanggalih/Desktop/personal/resi-printer")
+
+def get_bun_cmd() -> str:
+    bun_path = Path.home() / ".bun/bin/bun"
+    return str(bun_path) if bun_path.exists() else "bun"
+
+@app.get("/api/resi/status")
+def api_resi_status():
+    import urllib.request, json
+    RESI_DIR.mkdir(parents=True, exist_ok=True)
+    online = False
+    printer_info = {}
+    try:
+        req = urllib.request.Request("http://127.0.0.1:8137/api/printers", headers={"User-Agent": "shopee-dashboard"})
+        with urllib.request.urlopen(req, timeout=1.0) as resp:
+            if resp.status == 200:
+                online = True
+                printer_info = json.loads(resp.read().decode("utf-8"))
+    except Exception:
+        pass
+    
+    file_count = len(list(RESI_DIR.glob("*.pdf")))
+    return {
+        "online": online,
+        "url": "http://127.0.0.1:8137",
+        "printer": printer_info,
+        "resi_files_count": file_count,
+        "resi_dir": str(RESI_DIR)
+    }
+
+@app.post("/api/resi/start")
+def api_resi_start():
+    import subprocess, time, urllib.request
+    try:
+        with urllib.request.urlopen("http://127.0.0.1:8137/api/printers", timeout=0.8) as resp:
+            if resp.status == 200:
+                return {"status": "success", "message": "Server Resi Printer sudah aktif di http://127.0.0.1:8137"}
+    except Exception:
+        pass
+
+    bun_bin = get_bun_cmd()
+    script_path = RESI_PRINTER_DIR / "bin/resi.mjs"
+    if not script_path.exists():
+        return {"status": "error", "message": f"Script resi tidak ditemukan di {script_path}"}
+
+    try:
+        subprocess.Popen(
+            [bun_bin, str(script_path), "web", "--port", "8137", "--no-open"],
+            cwd=str(RESI_PRINTER_DIR),
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL
+        )
+        time.sleep(1.0)
+        return {"status": "success", "message": "Berhasil menjalankan background server Resi Printer (Port 8137)"}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+@app.get("/api/resi/files")
+def api_resi_files():
+    import pypdf, re, datetime
+    RESI_DIR.mkdir(parents=True, exist_ok=True)
+    files = []
+    for p in sorted(RESI_DIR.glob("*.pdf"), key=os.path.getmtime, reverse=True):
+        info = {
+            "filename": p.name,
+            "tracking_no": "-",
+            "order_no": "-",
+            "recipient": "-",
+            "pages": 1,
+            "size_kb": round(p.stat().st_size / 1024, 1),
+            "mtime": datetime.datetime.fromtimestamp(p.stat().st_mtime).strftime("%Y-%m-%d %H:%M")
+        }
+        try:
+            reader = pypdf.PdfReader(str(p))
+            info["pages"] = len(reader.pages)
+            text = reader.pages[0].extract_text() or ""
+            
+            resi_m = re.search(r'SPX[A-Z0-9]+', text)
+            if resi_m:
+                info["tracking_no"] = resi_m.group(0)
+            
+            order_m = re.search(r'2611[0-9A-Z]{8,12}', text)
+            if order_m:
+                info["order_no"] = order_m.group(0)
+            
+            lines = text.split("\n")
+            for i, line in enumerate(lines):
+                if "Penerima:" in line:
+                    if i + 2 < len(lines):
+                        cand = lines[i+2].strip()
+                        if cand and not cand.isdigit():
+                            info["recipient"] = cand
+                            break
+                    if i + 1 < len(lines):
+                        cand = lines[i+1].strip()
+                        if cand and not cand.isdigit():
+                            info["recipient"] = cand
+                            break
+        except Exception:
+            pass
+        files.append(info)
+    return {"status": "success", "files": files}
+
+@app.post("/api/resi/print")
+def api_resi_print(data: dict):
+    filename = data.get("filename", "")
+    if not filename:
+        return {"status": "error", "message": "Nama file resi harus diisi"}
+    pdf_path = RESI_DIR / filename
+    if not pdf_path.exists():
+        return {"status": "error", "message": f"File {filename} tidak ditemukan di folder resi"}
+    
+    bun_bin = get_bun_cmd()
+    script_path = RESI_PRINTER_DIR / "bin/resi.mjs"
+    
+    import subprocess
+    try:
+        cmd = [bun_bin, str(script_path), "import", str(pdf_path), "--yes"]
+        res = subprocess.run(cmd, cwd=str(RESI_PRINTER_DIR), capture_output=True, text=True, timeout=30)
+        output = (res.stdout or "") + (res.stderr or "")
+        if res.returncode == 0:
+            return {"status": "success", "message": f"Berhasil mengirim {filename} ke printer thermal BLE!", "output": output}
+        else:
+            return {"status": "error", "message": f"Gagal cetak resi: {output}", "output": output}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+@app.post("/api/resi/open-web")
+def api_resi_open_web():
+    url = "http://127.0.0.1:8137"
+    import subprocess
+    try:
+        brave_bin = Path("/Applications/Brave Browser.app/Contents/MacOS/Brave Browser")
+        profile_dir = get_brave_profile_dir("sdrisanggalih")
+        if brave_bin.exists():
+            subprocess.Popen([str(brave_bin), f"--profile-directory={profile_dir}", url])
+            subprocess.Popen(["open", "-a", "Brave Browser"])
+            return {"status": "success", "message": "Berhasil membuka Resi Printer di Brave (sdrisanggalih)"}
+        else:
+            subprocess.Popen(["open", url])
+            return {"status": "success", "message": "Berhasil membuka Resi Printer di browser"}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+@app.get("/api/resi/pdf/{filename}")
+def api_resi_view_pdf(filename: str):
+    pdf_path = RESI_DIR / filename
+    if not pdf_path.exists():
+        raise HTTPException(status_code=404, detail="File PDF resi tidak ditemukan")
+    return FileResponse(path=str(pdf_path), filename=filename, media_type="application/pdf")
+
+@app.post("/api/resi/upload")
+async def api_resi_upload(file: UploadFile = File(...)):
+    if not file.filename.lower().endswith(".pdf"):
+        return {"status": "error", "message": "Hanya file PDF label resi yang diperbolehkan"}
+    
+    RESI_DIR.mkdir(parents=True, exist_ok=True)
+    target_path = RESI_DIR / file.filename
+    content = await file.read()
+    with open(target_path, "wb") as f:
+        f.write(content)
+    return {"status": "success", "message": f"Resi {file.filename} berhasil diunggah ke folder resi!"}
+
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
 @app.get("/")
