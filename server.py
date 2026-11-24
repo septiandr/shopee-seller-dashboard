@@ -1248,87 +1248,93 @@ def api_resi_files():
 def create_thank_you_card(width: int = 576, height: int = 160, shop_name: str = 'TOKO ZERA', username: str = 'shopee.co.id/septiandr'):
     """
     Thanks Card ukuran presisi 80 x 20 mm (576 x 160 dots pada 203 DPI).
-    Layout 3 kolom horizontal:
-    - Kolom 1 (Kiri): Toko Zera, Ucapan Terima Kasih & Link Shopee
-    - Kolom 2 (Tengah): Banner Hitam Bintang 5 Hero
-    - Kolom 3 (Kanan): Kotak Garansi 100% Ganti Baru & Penyelamat Bintang 1
+    Desain bersih, modern, kontras tinggi (Swiss Editorial):
+    - Top: Perforasi garis sobek / gunting rapi
+    - Header Bar Hitam: Nama Toko, 5 Bintang Hero, & Ucapan Terima Kasih
+    - 2 Kolom Seimbang:
+      * Kiri: Ajakan Ulasan Bintang 5 + Foto + Link Shopee
+      * Kanan: Garansi Ganti Baru 100% + Penyelamat komplain / bintang 1
     """
     from PIL import Image, ImageDraw, ImageFont
     im = Image.new('L', (width, height), 255)
     draw = ImageDraw.Draw(im)
-    
+
     # 1. Garis Sobek / Tear Line di atas
-    dash_y = 6
-    draw.line([(8, dash_y), (width - 8, dash_y)], fill=0, width=1)
+    dash_y = 5
+    for x in range(12, width - 12, 14):
+        draw.line([(x, dash_y), (x + 8, dash_y)], fill=0, width=1)
     
     try:
-        font_badge = ImageFont.truetype('/System/Library/Fonts/Helvetica.ttc', 13, index=1)
-        font_bold = ImageFont.truetype('/System/Library/Fonts/Helvetica.ttc', 11, index=1)
-        font_regular = ImageFont.truetype('/System/Library/Fonts/Helvetica.ttc', 9, index=0)
-        font_xs = ImageFont.truetype('/System/Library/Fonts/Helvetica.ttc', 8, index=0)
-        font_stars = ImageFont.truetype('/System/Library/Fonts/Supplemental/Arial.ttf', 16)
+        font_sc = ImageFont.truetype('/System/Library/Fonts/Supplemental/Arial.ttf', 10)
     except Exception:
-        font_badge = font_bold = font_regular = font_xs = font_stars = ImageFont.load_default()
-        
-    tear_text = '- - - - - - - ✂ SOBEK / GUNTING DI SINI ✂ - - - - - - -'
-    bbox = draw.textbbox((0, 0), tear_text, font=font_xs)
-    tw = bbox[2] - bbox[0]
-    draw.rectangle([(width//2 - tw//2 - 6, 1), (width//2 + tw//2 + 6, 13)], fill=255)
-    draw.text(((width - tw) // 2, 2), tear_text, fill=0, font=font_xs)
+        font_sc = ImageFont.load_default()
+    sc_txt = ' ✂ GUNTING / SOBEK DI SINI ✂ '
+    sc_bb = draw.textbbox((0, 0), sc_txt, font=font_sc)
+    sc_w = sc_bb[2] - sc_bb[0]
+    draw.rectangle([(width//2 - sc_w//2 - 4, 1), (width//2 + sc_w//2 + 4, 11)], fill=255)
+    draw.text(((width - sc_w)//2, 1), sc_txt, fill=0, font=font_sc)
+
+    # 2. Main rounded container border
+    draw.rounded_rectangle([(8, 14), (width - 8, height - 5)], radius=6, outline=0, width=2)
+
+    # 3. Top Header Bar (Solid Black Banner)
+    draw.rounded_rectangle([(10, 16), (width - 10, 50)], radius=4, fill=0)
+    try:
+        font_h_shop = ImageFont.truetype('/System/Library/Fonts/Helvetica.ttc', 13, index=1)
+        font_stars = ImageFont.truetype('/System/Library/Fonts/Supplemental/Arial.ttf', 20)
+        font_h_thanks = ImageFont.truetype('/System/Library/Fonts/Helvetica.ttc', 12, index=1)
+    except Exception:
+        font_h_shop = font_stars = font_h_thanks = ImageFont.load_default()
+
+    draw.text((22, 24), shop_name, fill=255, font=font_h_shop)
     
-    # Outer Border Box (margin 4px)
-    draw.rounded_rectangle([(6, 16), (width - 6, height - 6)], radius=4, outline=0, width=1)
+    stars = '★ ★ ★ ★ ★'
+    st_bb = draw.textbbox((0, 0), stars, font=font_stars)
+    st_w = st_bb[2] - st_bb[0]
+    draw.text(((width - st_w)//2, 20), stars, fill=255, font=font_stars)
     
-    # Kolom 1 (Kiri - Lebar 190 dots): Toko Zera & Terima kasih
-    draw.text((14, 22), shop_name, fill=0, font=font_badge)
-    draw.text((14, 40), 'TERIMA KASIH! 🙏', fill=0, font=font_bold)
-    draw.text((14, 56), 'Semoga paket aman &', fill=0, font=font_regular)
-    draw.text((14, 70), 'motor makin ganteng!', fill=0, font=font_regular)
-    draw.text((14, 88), username, fill=0, font=font_xs)
-    draw.line([(14, 102), (180, 102)], fill=0, width=1)
-    draw.text((14, 108), '100% AMANAH', fill=0, font=font_xs)
-    
-    # Separator 1
-    draw.line([(195, 22), (195, height - 12)], fill=0, width=1)
-    
-    # Kolom 2 (Tengah - Lebar 185 dots): Bintang 5 Hero Banner
-    banner_left = 205
-    banner_right = 380
-    draw.rectangle([(banner_left, 24), (banner_right, 92)], fill=0)
-    
-    stars_str = '★ ★ ★ ★ ★'
-    st_bbox = draw.textbbox((0, 0), stars_str, font=font_stars)
-    stw = st_bbox[2] - st_bbox[0]
-    draw.text((banner_left + (banner_right - banner_left - stw)//2, 30), stars_str, fill=255, font=font_stars)
-    
-    cta1 = 'MOHON BANTU ULASAN'
-    cta1_bbox = draw.textbbox((0, 0), cta1, font=font_bold)
-    draw.text((banner_left + (banner_right - banner_left - (cta1_bbox[2]-cta1_bbox[0]))//2, 54), cta1, fill=255, font=font_bold)
-    
-    cta2 = '& FOTO BINTANG 5 ⭐'
-    cta2_bbox = draw.textbbox((0, 0), cta2, font=font_bold)
-    draw.text((banner_left + (banner_right - banner_left - (cta2_bbox[2]-cta2_bbox[0]))//2, 70), cta2, fill=255, font=font_bold)
-    
-    draw.text((banner_left + 10, 102), 'Ulasan Anda sangat berarti bagi kami!', fill=0, font=font_xs)
-    
-    # Separator 2
-    draw.line([(390, 22), (390, height - 12)], fill=0, width=1)
-    
-    # Kolom 3 (Kanan - Lebar 170 dots): Box Garansi / Solusi Komplain
-    draw.rectangle([(398, 24), (width - 14, 88)], fill=255, outline=0, width=1)
-    draw.text((406, 28), '⚠️ ADA KENDALA / KURANG?', fill=0, font=font_bold)
-    draw.text((406, 44), 'JANGAN RATING BURUK DULU!', fill=0, font=font_bold)
-    draw.text((406, 58), 'Chat admin kami di Shopee.', fill=0, font=font_regular)
-    draw.text((406, 72), 'KAMI GARANSI GANTI BARU 100%', fill=0, font=font_xs)
-    
-    draw.text((406, 96), '✓ Ready Solusi Terbaik', fill=0, font=font_xs)
-    draw.text((406, 110), '✓ Fast Response di Jam Kerja', fill=0, font=font_xs)
-    
+    th_txt = 'TERIMA KASIH'
+    th_bb = draw.textbbox((0, 0), th_txt, font=font_h_thanks)
+    draw.text((width - 24 - (th_bb[2]-th_bb[0]), 25), th_txt, fill=255, font=font_h_thanks)
+
+    # 4. Vertical Divider
+    div_x = 320
+    draw.line([(div_x, 52), (div_x, height - 7)], fill=0, width=1)
+
+    # 5. Left Column (Review & 5 Stars CTA)
+    try:
+        font_cta_title = ImageFont.truetype('/System/Library/Fonts/Helvetica.ttc', 12, index=1)
+        font_body = ImageFont.truetype('/System/Library/Fonts/Helvetica.ttc', 10, index=0)
+        font_bold_sm = ImageFont.truetype('/System/Library/Fonts/Helvetica.ttc', 10, index=1)
+    except Exception:
+        font_cta_title = font_body = font_bold_sm = ImageFont.load_default()
+
+    draw.text((22, 58), 'MOHON ULASAN BINTANG 5 & FOTO ★', fill=0, font=font_cta_title)
+    draw.text((22, 76), 'Kepuasan Kakak adalah prioritas utama kami.', fill=0, font=font_body)
+    draw.text((22, 92), 'Jika puas, dukung toko kami dengan rating bintang 5!', fill=0, font=font_body)
+    draw.text((22, 114), f'Shopee: {username}', fill=0, font=font_bold_sm)
+
+    # 6. Right Column (Warranty / Anti-Bad Rating)
+    try:
+        font_warn_title = ImageFont.truetype('/System/Library/Fonts/Helvetica.ttc', 11, index=1)
+        font_warn_body = ImageFont.truetype('/System/Library/Fonts/Helvetica.ttc', 9, index=0)
+    except Exception:
+        font_warn_title = font_warn_body = ImageFont.load_default()
+
+    # Black sub-badge for warranty
+    draw.rectangle([(div_x + 12, 56), (width - 20, 74)], fill=0)
+    draw.text((div_x + 18, 58), 'GARANSI GANTI BARU 100%', fill=255, font=font_bold_sm)
+
+    draw.text((div_x + 12, 80), '[!] Barang Kurang / Rusak / Salah?', fill=0, font=font_warn_title)
+    draw.text((div_x + 12, 96), 'JANGAN BERI NILAI BURUK DULU!', fill=0, font=font_bold_sm)
+    draw.text((div_x + 12, 112), 'Chat admin Shopee, kami ganti 100% amanah.', fill=0, font=font_warn_body)
+    draw.text((div_x + 12, 128), '✓ Respon Cepat  ✓ Garansi Pasti Beres', fill=0, font=font_bold_sm)
+
     return im
 
 def build_resi_with_card(pdf_path: Path, dots: int = 576):
     import tempfile, glob, subprocess
-    from PIL import Image
+    from PIL import Image, ImageOps
     tmpdir = tempfile.mkdtemp(prefix='resi_card_')
     render_bin = RESI_PRINTER_DIR / 'bin/render-pdf'
     
@@ -1342,7 +1348,7 @@ def build_resi_with_card(pdf_path: Path, dots: int = 576):
     if not page_files:
         raise RuntimeError("Gagal meraster halaman resi PDF")
         
-    card = create_thank_you_card(dots)
+    card = create_thank_you_card(width=dots, height=160)
     stitched_images = []
     for pf in page_files:
         resi_im = Image.open(pf).convert('L')
@@ -1350,9 +1356,15 @@ def build_resi_with_card(pdf_path: Path, dots: int = 576):
         target_h = int(rh * (dots / rw))
         resi_scaled = resi_im.resize((dots, target_h), Image.Resampling.LANCZOS)
         
-        comb = Image.new('L', (dots, target_h + card.height), 255)
-        comb.paste(resi_scaled, (0, 0))
-        comb.paste(card, (0, target_h))
+        # Pangkas margin putih kosong di bawah resi agar kartu menempel pas di bawah tabel resi
+        inv = ImageOps.invert(resi_scaled.point(lambda p: 255 if p > 200 else 0))
+        bbox = inv.getbbox()
+        bottom_crop = min(resi_scaled.height, bbox[3] + 12) if bbox else resi_scaled.height
+        resi_cropped = resi_scaled.crop((0, 0, dots, bottom_crop))
+        
+        comb = Image.new('L', (dots, resi_cropped.height + card.height), 255)
+        comb.paste(resi_cropped, (0, 0))
+        comb.paste(card, (0, resi_cropped.height))
         stitched_images.append(comb)
         
     out_pdf = Path(tmpdir) / f'stitched_{pdf_path.name}'
@@ -1464,10 +1476,17 @@ def api_resi_image(
     resi_scaled = resi_im.resize((dots, target_h), Image.Resampling.LANCZOS)
 
     if card:
-        card_im = create_thank_you_card(width=dots)
-        comb = Image.new("L", (dots, target_h + card_im.height), 255)
-        comb.paste(resi_scaled, (0, 0))
-        comb.paste(card_im, (0, target_h))
+        # Pangkas margin putih kosong di bawah resi agar kartu menempel pas di bawah tabel resi
+        from PIL import ImageOps
+        inv = ImageOps.invert(resi_scaled.point(lambda p: 255 if p > 200 else 0))
+        bbox = inv.getbbox()
+        bottom_crop = min(resi_scaled.height, bbox[3] + 12) if bbox else resi_scaled.height
+        resi_cropped = resi_scaled.crop((0, 0, dots, bottom_crop))
+
+        card_im = create_thank_you_card(width=dots, height=160)
+        comb = Image.new("L", (dots, resi_cropped.height + card_im.height), 255)
+        comb.paste(resi_cropped, (0, 0))
+        comb.paste(card_im, (0, resi_cropped.height))
         final_im = comb
     else:
         final_im = resi_scaled
