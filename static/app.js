@@ -2030,10 +2030,16 @@ async function loadResiFiles() {
                   <i data-lucide="printer" class="w-3 h-3"></i>
                   <span>Cetak BLE</span>
                 </button>
+                <a href="/api/resi/pdf/${encodeURIComponent(rf.filename)}?include_card=1" target="_blank" 
+                   class="btn-tactile px-2 py-1 text-xs font-bold rounded border border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100 flex items-center gap-1"
+                   title="Lihat Pratinjau Resi + Kartu Bintang 5">
+                  <i data-lucide="eye" class="w-3 h-3 text-amber-600"></i>
+                  <span class="hidden sm:inline">Resi+Kartu</span>
+                </a>
                 <a href="/api/resi/pdf/${encodeURIComponent(rf.filename)}" target="_blank" 
-                   class="btn-tactile px-2 py-1 text-xs rounded border border-slate-200 text-slate-600 hover:bg-slate-100 flex items-center gap-1"
-                   title="Buka / Unduh File PDF Asli">
-                  <i data-lucide="eye" class="w-3 h-3"></i>
+                   class="btn-tactile px-1.5 py-1 text-xs rounded border border-slate-200 text-slate-500 hover:bg-slate-100 flex items-center gap-1"
+                   title="Lihat Label Resi Asli (Tanpa Kartu)">
+                  <i data-lucide="file-text" class="w-3 h-3"></i>
                 </a>
               </div>
             </td>
@@ -2054,12 +2060,16 @@ async function loadResiFiles() {
 
 async function printResiBle(filename, event = null) {
   if (event) event.stopPropagation();
+  const checkEl = document.getElementById('checkIncludeCard');
+  const includeCard = checkEl ? checkEl.checked : true;
+  const labelText = includeCard ? `${filename} (+ Kartu Bintang 5)` : filename;
+
   try {
-    showToast(`Mengirim resi ${filename} ke printer Bluetooth BLE (RPP02N)...`, 'info');
+    showToast(`Mengirim ${labelText} ke printer Bluetooth BLE (RPP02N)...`, 'info');
     const res = await fetch('/api/resi/print', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ filename })
+      body: JSON.stringify({ filename, include_card: includeCard })
     });
     const data = await res.json();
     if (data.status === 'success') {

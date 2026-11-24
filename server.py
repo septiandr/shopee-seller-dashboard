@@ -1245,9 +1245,118 @@ def api_resi_files():
         files.append(info)
     return {"status": "success", "files": files}
 
+def create_thank_you_card(width: int = 576, shop_name: str = 'TOKO ZERA', username: str = 'shopee.co.id/septiandr'):
+    from PIL import Image, ImageDraw, ImageFont
+    height = 240
+    im = Image.new('L', (width, height), 255)
+    draw = ImageDraw.Draw(im)
+    
+    dash_y = 12
+    draw.line([(10, dash_y), (width - 10, dash_y)], fill=0, width=1)
+    
+    try:
+        font_bold = ImageFont.truetype('/System/Library/Fonts/Helvetica.ttc', 16, index=1)
+        font_sm_bold = ImageFont.truetype('/System/Library/Fonts/Helvetica.ttc', 12, index=1)
+        font_regular = ImageFont.truetype('/System/Library/Fonts/Helvetica.ttc', 11, index=0)
+        font_xs = ImageFont.truetype('/System/Library/Fonts/Helvetica.ttc', 9, index=0)
+        font_stars = ImageFont.truetype('/System/Library/Fonts/Supplemental/Arial.ttf', 18)
+    except Exception:
+        font_bold = font_sm_bold = font_regular = font_xs = font_stars = ImageFont.load_default()
+        
+    tear_text = '- - - - - - - ✂ GUNTING / SOBEK DI SINI ✂ - - - - - - -'
+    bbox = draw.textbbox((0, 0), tear_text, font=font_xs)
+    tw = bbox[2] - bbox[0]
+    draw.rectangle([(width//2 - tw//2 - 6, 4), (width//2 + tw//2 + 6, 20)], fill=255)
+    draw.text(((width - tw) // 2, 6), tear_text, fill=0, font=font_xs)
+    
+    card_top = 24
+    card_bot = height - 8
+    draw.rounded_rectangle([(8, card_top), (width - 8, card_bot)], radius=6, outline=0, width=2)
+    
+    s_bbox = draw.textbbox((0, 0), shop_name, font=font_bold)
+    sw = s_bbox[2] - s_bbox[0]
+    draw.text(((width - sw) // 2, card_top + 8), shop_name, fill=0, font=font_bold)
+    draw.line([(width//2 - sw//2, card_top + 28), (width//2 + sw//2, card_top + 28)], fill=0, width=1)
+    
+    t_text = 'TERIMA KASIH ATAS PESANANNYA! 🙏'
+    t_bbox = draw.textbbox((0, 0), t_text, font=font_sm_bold)
+    tw = t_bbox[2] - t_bbox[0]
+    draw.text(((width - tw) // 2, card_top + 34), t_text, fill=0, font=font_sm_bold)
+    
+    sub_text = 'Semoga paket sampai dengan aman & motor makin ganteng!'
+    sub_bbox = draw.textbbox((0, 0), sub_text, font=font_regular)
+    subw = sub_bbox[2] - sub_bbox[0]
+    draw.text(((width - subw) // 2, card_top + 52), sub_text, fill=0, font=font_regular)
+    
+    banner_top = card_top + 72
+    banner_bot = banner_top + 50
+    draw.rectangle([(16, banner_top), (width - 16, banner_bot)], fill=0)
+    
+    stars_str = '★ ★ ★ ★ ★'
+    st_bbox = draw.textbbox((0, 0), stars_str, font=font_stars)
+    stw = st_bbox[2] - st_bbox[0]
+    draw.text(((width - stw) // 2, banner_top + 3), stars_str, fill=255, font=font_stars)
+    
+    cta_str = 'MOHON BANTU DENGAN ULASAN & FOTO BINTANG 5'
+    cta_bbox = draw.textbbox((0, 0), cta_str, font=font_sm_bold)
+    ctaw = cta_bbox[2] - cta_bbox[0]
+    draw.text(((width - ctaw) // 2, banner_top + 28), cta_str, fill=255, font=font_sm_bold)
+    
+    w_top = banner_bot + 6
+    w_bot = w_top + 36
+    draw.rectangle([(16, w_top), (width - 16, w_bot)], outline=0, width=1, fill=255)
+    
+    w_title = '⚠️ ADA KENDALA / BAUT KURANG / PECAH?'
+    draw.text((24, w_top + 4), w_title, fill=0, font=font_xs)
+    
+    w_desc = 'JANGAN RATING BURUK DULU! Chat admin di Shopee, kami GARANSI ganti baru 100%!'
+    draw.text((24, w_top + 18), w_desc, fill=0, font=font_xs)
+    
+    f_text = f'{username}  •  100% AMANAH & TERPERCAYA'
+    f_bbox = draw.textbbox((0, 0), f_text, font=font_xs)
+    fw = f_bbox[2] - f_bbox[0]
+    draw.text(((width - fw) // 2, card_bot - 14), f_text, fill=0, font=font_xs)
+    
+    return im
+
+def build_resi_with_card(pdf_path: Path, dots: int = 576):
+    import tempfile, glob, subprocess
+    from PIL import Image
+    tmpdir = tempfile.mkdtemp(prefix='resi_card_')
+    render_bin = RESI_PRINTER_DIR / 'bin/render-pdf'
+    
+    if render_bin.exists():
+        subprocess.run([str(render_bin), str(pdf_path), tmpdir, '300'], check=True)
+        page_files = sorted(glob.glob(os.path.join(tmpdir, 'page-*.png')))
+    else:
+        subprocess.run(['qlmanage', '-t', '-s', '1000', '-o', tmpdir, str(pdf_path)], check=True)
+        page_files = sorted(glob.glob(os.path.join(tmpdir, '*.png')))
+    
+    if not page_files:
+        raise RuntimeError("Gagal meraster halaman resi PDF")
+        
+    card = create_thank_you_card(dots)
+    stitched_images = []
+    for pf in page_files:
+        resi_im = Image.open(pf).convert('L')
+        rw, rh = resi_im.size
+        target_h = int(rh * (dots / rw))
+        resi_scaled = resi_im.resize((dots, target_h), Image.Resampling.LANCZOS)
+        
+        comb = Image.new('L', (dots, target_h + card.height), 255)
+        comb.paste(resi_scaled, (0, 0))
+        comb.paste(card, (0, target_h))
+        stitched_images.append(comb)
+        
+    out_pdf = Path(tmpdir) / f'stitched_{pdf_path.name}'
+    stitched_images[0].save(str(out_pdf), 'PDF', save_all=True, append_images=stitched_images[1:], resolution=203.0)
+    return out_pdf
+
 @app.post("/api/resi/print")
 def api_resi_print(data: dict):
     filename = data.get("filename", "")
+    include_card = data.get("include_card", True)
+    
     if not filename:
         return {"status": "error", "message": "Nama file resi harus diisi"}
     pdf_path = RESI_DIR / filename
@@ -1257,13 +1366,23 @@ def api_resi_print(data: dict):
     bun_bin = get_bun_cmd()
     script_path = RESI_PRINTER_DIR / "bin/resi.mjs"
     
+    # Determine print target (stitched with card or original)
+    target_pdf = pdf_path
+    if include_card:
+        try:
+            target_pdf = build_resi_with_card(pdf_path, dots=576)
+        except Exception as e:
+            # Fallback to original if stitching fails
+            target_pdf = pdf_path
+    
     import subprocess
     try:
-        cmd = [bun_bin, str(script_path), "import", str(pdf_path), "--yes"]
+        cmd = [bun_bin, str(script_path), "import", str(target_pdf), "--yes"]
         res = subprocess.run(cmd, cwd=str(RESI_PRINTER_DIR), capture_output=True, text=True, timeout=30)
         output = (res.stdout or "") + (res.stderr or "")
+        card_msg = " + Kartu Bintang 5" if include_card else ""
         if res.returncode == 0:
-            return {"status": "success", "message": f"Berhasil mengirim {filename} ke printer thermal BLE!", "output": output}
+            return {"status": "success", "message": f"Berhasil mencetak {filename}{card_msg} ke printer thermal BLE!", "output": output}
         else:
             return {"status": "error", "message": f"Gagal cetak resi: {output}", "output": output}
     except Exception as e:
@@ -1287,10 +1406,18 @@ def api_resi_open_web():
         return {"status": "error", "message": str(e)}
 
 @app.get("/api/resi/pdf/{filename}")
-def api_resi_view_pdf(filename: str):
+def api_resi_view_pdf(filename: str, include_card: bool = False):
     pdf_path = RESI_DIR / filename
     if not pdf_path.exists():
         raise HTTPException(status_code=404, detail="File PDF resi tidak ditemukan")
+    
+    if include_card:
+        try:
+            target_pdf = build_resi_with_card(pdf_path, dots=576)
+            return FileResponse(path=str(target_pdf), filename=f"stitched_{filename}", media_type="application/pdf")
+        except Exception:
+            pass
+            
     return FileResponse(path=str(pdf_path), filename=filename, media_type="application/pdf")
 
 @app.post("/api/resi/upload")
