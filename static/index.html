@@ -193,10 +193,14 @@
           <span class="hidden sm:inline">Stiker Thermal</span>
         </a>
 
-        <button onclick="openResiModal()" class="btn-tactile flex items-center gap-2 px-3 py-2 text-xs font-bold rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 shadow-sm" title="Pusat Cetak Resi Shopee (Thermal BLE)">
-          <i data-lucide="printer" class="w-3.5 h-3.5 text-indigo-600"></i>
-          <span class="hidden sm:inline">Cetak Resi BLE</span>
-          <span id="resiStatusDot" class="w-2 h-2 rounded-full bg-emerald-500" title="Resi Printer Siap"></span>
+        <button onclick="directPrintLatestResi()" class="btn-tactile flex items-center gap-2 px-3 py-2 text-xs font-bold rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm shadow-indigo-500/20" title="Langsung Cetak Resi Terbaru ke Printer 80mm">
+          <i data-lucide="printer" class="w-3.5 h-3.5 stroke-[2.5]"></i>
+          <span class="hidden sm:inline">Langsung Cetak Resi</span>
+          <span id="resiStatusDot" class="w-2 h-2 rounded-full bg-emerald-400" title="Resi Printer Siap"></span>
+        </button>
+        <button onclick="openResiModal()" class="btn-tactile flex items-center gap-1.5 px-2.5 py-2 text-xs font-semibold rounded-lg bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 shadow-sm" title="Daftar & Upload File Resi">
+          <i data-lucide="folder-clock" class="w-3.5 h-3.5 text-slate-500"></i>
+          <span class="hidden md:inline">Daftar</span>
         </button>
       </div>
     </div>
@@ -243,12 +247,18 @@
           <p class="text-xs text-slate-600">Pantau performa penjualan, pesanan masuk, omzet, dan margin laba bersih produk.</p>
         </div>
         <div class="flex items-center gap-2">
-          <button onclick="openResiModal()" 
+          <button onclick="directPrintLatestResi()" 
                   class="btn-tactile flex items-center gap-2 px-3.5 py-2 text-xs font-bold rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm shadow-indigo-500/20"
-                  title="Buka Pusat Cetak Resi Shopee (Thermal BLE)">
+                  title="Langsung Cetak Resi Terbaru ke Printer 80mm">
             <i data-lucide="printer" class="w-4 h-4 stroke-[2.5]"></i>
-            <span>Cetak Resi BLE</span>
+            <span>Langsung Cetak Resi</span>
             <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-indigo-800 text-indigo-100" id="badgeResiCountTab">11</span>
+          </button>
+          <button onclick="openResiModal()" 
+                  class="btn-tactile flex items-center gap-1.5 px-2.5 py-2 text-xs font-semibold rounded-lg bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 shadow-sm"
+                  title="Buka Daftar File Resi & Upload PDF">
+            <i data-lucide="folder-clock" class="w-4 h-4 text-slate-600"></i>
+            <span>Daftar Resi</span>
           </button>
           <a href="/static/thermal-card.html" 
              target="_blank" 
@@ -1440,17 +1450,35 @@
       }
     };
 
-    window.openPrintResi = function(filename, event = null) {
+    window.openPrintResi = function(filename, event = null, autoPrint = false) {
       if (event) event.stopPropagation();
       const checkEl = document.getElementById('checkIncludeCard');
       const includeCard = checkEl ? (checkEl.checked ? '1' : '0') : '1';
       const threshEl = document.getElementById('selectResiThreshold');
       const thresholdVal = threshEl ? threshEl.value : '180';
-      const url = `/static/print-resi.html?file=${encodeURIComponent(filename)}&card=${includeCard}&threshold=${thresholdVal}`;
+      const autoParam = autoPrint ? '&auto=1' : '';
+      const url = `/static/print-resi.html?file=${encodeURIComponent(filename)}&card=${includeCard}&threshold=${thresholdVal}${autoParam}`;
       window.open(url, '_blank');
+    };
+
+    window.directPrintLatestResi = async function() {
+      try {
+        if (typeof showToast === 'function') showToast('Membuka resi terbaru untuk langsung dicetak...', 'info');
+        const res = await fetch('/api/resi/files');
+        const data = await res.json();
+        if (!data.files || data.files.length === 0) {
+          alert('Belum ada file resi di folder resi/. Silakan upload resi terlebih dahulu.');
+          window.openResiModal();
+          return;
+        }
+        const latest = data.files[0];
+        window.openPrintResi(latest.filename, null, true);
+      } catch (err) {
+        alert('Gagal memuat resi terbaru: ' + err.message);
+      }
     };
   </script>
 
-  <script src="/static/app.js?v=20261124_02"></script>
+  <script src="/static/app.js?v=20261124_03"></script>
 </body>
 </html>

@@ -452,8 +452,8 @@
           <svg style="width:14px;height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
           Buka Resi Web (Port 8137)
         </a>
-        <button onclick="window.print()" class="btn-print">
-          🖨️ Cetak / Print Sekarang
+        <button onclick="window.print()" class="btn-print" title="Cetak langsung ke printer 80mm (Tekan Enter)">
+          🖨️ Cetak / Print Sekarang (Enter)
         </button>
       </div>
     </div>
@@ -658,6 +658,10 @@
           loadedCount++;
           if (loadedCount >= totalToLoad) {
             overlay.style.display = 'none';
+            if (params.get('auto') === '1' && !window.__hasAutoPrinted) {
+              window.__hasAutoPrinted = true;
+              setTimeout(() => window.print(), 350);
+            }
           }
         };
         img.onerror = () => {
@@ -672,12 +676,15 @@
       });
     }
 
+    // Keyboard shortcut Enter to print immediately
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        window.print();
+      }
+    });
+
     initPageList().then(() => {
       updatePreview();
-      // If auto-print requested
-      if (params.get('auto') === '1') {
-        setTimeout(() => window.print(), 800);
-      }
     });
   </script>
 </body>

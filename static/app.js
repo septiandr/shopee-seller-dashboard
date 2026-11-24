@@ -244,7 +244,7 @@ async function loadOrders() {
         (rf.tracking_no && rf.tracking_no !== '-' && o.tracking_no && o.tracking_no.includes(rf.tracking_no))
       );
       const resiPrintBtn = matchedResi
-        ? `<button onclick="openPrintResi('${escapeHtml(matchedResi.filename)}', event)" class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 mt-1 ml-1" title="Cetak label resi ${escapeHtml(matchedResi.filename)} ke Printer 80mm"><i data-lucide="printer" class="w-3 h-3"></i> Cetak Resi 80mm</button>`
+        ? `<button onclick="openPrintResi('${escapeHtml(matchedResi.filename)}', event, true)" class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-600 text-white hover:bg-indigo-700 shadow-xs mt-1 ml-1" title="Langsung cetak resi ${escapeHtml(matchedResi.filename)} ke Printer 80mm"><i data-lucide="printer" class="w-3 h-3"></i> Cetak Resi (Langsung)</button>`
         : '';
 
       return `
@@ -2058,15 +2058,33 @@ async function loadResiFiles() {
   }
 }
 
-function openPrintResi(filename, event = null) {
+function openPrintResi(filename, event = null, autoPrint = false) {
   if (event) event.stopPropagation();
   const checkEl = document.getElementById('checkIncludeCard');
   const includeCard = checkEl ? (checkEl.checked ? '1' : '0') : '1';
   const threshEl = document.getElementById('selectResiThreshold');
   const thresholdVal = threshEl ? threshEl.value : '180';
 
-  const url = `/static/print-resi.html?file=${encodeURIComponent(filename)}&card=${includeCard}&threshold=${thresholdVal}`;
+  const autoParam = autoPrint ? '&auto=1' : '';
+  const url = `/static/print-resi.html?file=${encodeURIComponent(filename)}&card=${includeCard}&threshold=${thresholdVal}${autoParam}`;
   window.open(url, '_blank');
+}
+
+async function directPrintLatestResi() {
+  try {
+    showToast('Membuka resi terbaru untuk langsung dicetak...', 'info');
+    const res = await fetch('/api/resi/files');
+    const data = await res.json();
+    if (!data.files || data.files.length === 0) {
+      showToast('Belum ada file resi di folder resi/. Silakan upload resi terlebih dahulu.', 'error');
+      openResiModal();
+      return;
+    }
+    const latest = data.files[0];
+    openPrintResi(latest.filename, null, true);
+  } catch (err) {
+    showToast('Gagal memuat resi terbaru: ' + err.message, 'error');
+  }
 }
 
 async function printResiBle(filename, event = null) {
