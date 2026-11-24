@@ -2062,14 +2062,15 @@ async function printResiBle(filename, event = null) {
   if (event) event.stopPropagation();
   const checkEl = document.getElementById('checkIncludeCard');
   const includeCard = checkEl ? checkEl.checked : true;
-  const labelText = includeCard ? `${filename} (+ Kartu Bintang 5)` : filename;
+  const thresholdVal = Number(document.getElementById('selectResiThreshold')?.value || 180);
+  const labelText = includeCard ? `${filename} (+ Kartu Bintang 5, Gelap ≥ ${thresholdVal})` : `${filename} (Gelap ≥ ${thresholdVal})`;
 
   try {
     showToast(`Mengirim ${labelText} ke printer Bluetooth BLE (RPP02N)...`, 'info');
     const res = await fetch('/api/resi/print', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ filename, include_card: includeCard })
+      body: JSON.stringify({ filename, include_card: includeCard, threshold: thresholdVal })
     });
     const data = await res.json();
     if (data.status === 'success') {

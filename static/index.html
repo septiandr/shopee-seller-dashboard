@@ -1186,15 +1186,24 @@
         </button>
       </div>
 
-      <!-- Checkbox Pilihan Kartu Bintang 5 di Bawah Resi -->
-      <div class="flex items-center justify-between p-3 rounded-xl bg-amber-50/90 border border-amber-200 text-xs shadow-xs">
+      <!-- Checkbox Pilihan Kartu Bintang 5 di Bawah Resi & Pengaturan Kegelapan -->
+      <div class="flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl bg-amber-50/90 border border-amber-200 text-xs shadow-xs">
         <label class="flex items-center gap-2.5 cursor-pointer font-bold text-slate-900 select-none">
           <input type="checkbox" id="checkIncludeCard" checked class="w-4 h-4 rounded text-amber-600 focus:ring-amber-500 border-slate-300 accent-amber-600">
           <span class="flex items-center gap-1.5">
             <span>⭐ Sertakan Kartu Bintang 5 di Bawah Resi (Garis Sobek Otomatis)</span>
           </span>
         </label>
-        <span class="text-[11px] text-amber-800 font-semibold hidden md:inline">1x Print: Resi + Kartu Ulasan Otomatis Terhubung</span>
+
+        <div class="flex items-center gap-2">
+          <label for="selectResiThreshold" class="font-bold text-slate-700 whitespace-nowrap">Gelap &ge;:</label>
+          <select id="selectResiThreshold" class="text-xs py-1 px-2 font-bold rounded-lg border border-amber-300 bg-white text-slate-800 shadow-2xs">
+            <option value="80">80 - Lebih terang</option>
+            <option value="128">128 - Standar</option>
+            <option value="180" selected>180 - Lebih pekat & tajam (Default)</option>
+            <option value="210">210 - Pekat sekali</option>
+          </select>
+        </div>
       </div>
 
       <!-- Table of Resi Files -->

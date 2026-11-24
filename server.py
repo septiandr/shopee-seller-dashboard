@@ -1375,9 +1375,10 @@ def api_resi_print(data: dict):
             # Fallback to original if stitching fails
             target_pdf = pdf_path
     
+    threshold = str(data.get("threshold", 180))
     import subprocess
     try:
-        cmd = [bun_bin, str(script_path), "import", str(target_pdf), "--yes"]
+        cmd = [bun_bin, str(script_path), "import", str(target_pdf), "--threshold", threshold, "--yes"]
         res = subprocess.run(cmd, cwd=str(RESI_PRINTER_DIR), capture_output=True, text=True, timeout=30)
         output = (res.stdout or "") + (res.stderr or "")
         card_msg = " + Kartu Bintang 5" if include_card else ""
