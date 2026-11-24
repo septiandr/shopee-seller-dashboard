@@ -14,18 +14,18 @@ import {
 } from 'lucide-astro';
 ---
 
-<header class="border-b border-slate-200/80 bg-white/95 backdrop-blur-md sticky top-0 z-40 shadow-[0_1px_3px_0_rgba(15,23,42,0.03)]">
+<header class="border-b border-slate-200/80 bg-white/90 backdrop-blur-md sticky top-0 z-40 shadow-[0_1px_3px_0_rgba(15,23,42,0.03)]">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
     
     <!-- Brand & Shop Identity -->
     <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 text-white flex items-center justify-center font-black shadow-md shadow-amber-500/20 shrink-0">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 via-amber-500 to-orange-500 text-white flex items-center justify-center font-black shadow-md shadow-amber-500/25 ring-1 ring-white/20 shrink-0">
         <ShieldCheck class="w-5 h-5 stroke-[2.5]" />
       </div>
       <div>
         <div class="flex items-center gap-2">
           <h1 class="text-sm sm:text-base font-extrabold tracking-tight text-slate-900">Shopee Ledger & Ads</h1>
-          <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200/80">Cover Knalpot</span>
+          <span class="text-[10px] uppercase font-extrabold tracking-wider px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200/80">Cover Knalpot</span>
         </div>
         <p class="text-[11px] text-slate-500 flex items-center gap-1.5 mt-0.5 font-medium">
           <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -38,7 +38,7 @@ import {
     <div class="flex items-center gap-2">
       
       <!-- Direct Shopee Seller Shortcut Buttons -->
-      <div class="hidden xl:flex items-center bg-slate-100/90 p-0.5 rounded-xl border border-slate-200/80 text-xs">
+      <div class="hidden xl:flex items-center bg-slate-100/90 p-0.5 rounded-xl border border-slate-200/80 text-xs shadow-inner">
         <a href="https://seller.shopee.co.id/portal/sale/order" 
            target="_blank" 
            rel="noopener noreferrer" 
@@ -70,38 +70,38 @@ import {
         </a>
       </div>
 
-      <button id="btnSyncFolder" onclick="syncAllData()" class="btn-tactile flex items-center gap-2 ps-2.5 pe-3.5 py-2 text-xs font-bold rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200/90 hover:bg-emerald-100 shadow-sm" title="Sinkronkan data dari folder">
+      <button id="btnSyncFolder" onclick="syncAllData()" class="btn-tactile flex items-center gap-2 ps-2.5 pe-3.5 py-2 text-xs font-bold rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200/90 hover:bg-emerald-100 shadow-xs" title="Sinkronkan data dari folder">
         <RefreshCw class="w-3.5 h-3.5" id="iconSync" />
         <span class="hidden md:inline">Sinkronkan Folder</span>
       </button>
 
-      <button onclick="openUploadModal()" class="btn-tactile flex items-center gap-2 ps-3 pe-4 py-2 text-xs font-bold rounded-lg bg-amber-500 text-white hover:bg-amber-600 shadow-sm shadow-amber-500/20">
+      <button onclick="openUploadModal()" class="btn-tactile flex items-center gap-2 ps-3 pe-4 py-2 text-xs font-bold rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-white hover:from-amber-600 hover:to-amber-700 shadow-sm shadow-amber-500/25">
         <Upload class="w-3.5 h-3.5 stroke-[2.5]" />
         <span>Upload File</span>
       </button>
 
-      <button onclick="openSettingsModal()" class="btn-tactile flex items-center gap-2 ps-2.5 pe-3.5 py-2 text-xs font-semibold rounded-lg bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 hover:border-slate-300 shadow-sm" title="Pengaturan HPP & Folder">
+      <button onclick="openSettingsModal()" class="btn-tactile flex items-center gap-2 ps-2.5 pe-3.5 py-2 text-xs font-semibold rounded-xl bg-white text-slate-700 border border-slate-200/90 hover:bg-slate-50 hover:border-slate-300 shadow-xs" title="Pengaturan HPP & Folder">
         <Sliders class="w-3.5 h-3.5 text-slate-500" />
         <span class="hidden sm:inline">HPP</span>
       </button>
 
-      <button onclick="exportExcel()" class="btn-tactile flex items-center gap-2 ps-2.5 pe-3.5 py-2 text-xs font-semibold rounded-lg bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 hover:border-slate-300 shadow-sm" title="Download Laporan Excel">
+      <button onclick="exportExcel()" class="btn-tactile flex items-center gap-2 ps-2.5 pe-3.5 py-2 text-xs font-semibold rounded-xl bg-white text-slate-700 border border-slate-200/90 hover:bg-slate-50 hover:border-slate-300 shadow-xs" title="Download Laporan Excel">
         <Download class="w-3.5 h-3.5 text-slate-500" />
         <span class="hidden sm:inline">Export</span>
       </button>
 
-      <a href="/thermal-card" target="_blank" class="btn-tactile flex items-center gap-2 ps-2.5 pe-3.5 py-2 text-xs font-semibold rounded-lg bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 hover:border-slate-300 shadow-sm" title="Cetak Kartu Ucapan / Stiker Thermal Terima Kasih">
+      <a href="/thermal-card" target="_blank" class="btn-tactile flex items-center gap-2 ps-2.5 pe-3.5 py-2 text-xs font-semibold rounded-xl bg-white text-slate-700 border border-slate-200/90 hover:bg-slate-50 hover:border-slate-300 shadow-xs" title="Cetak Kartu Ucapan / Stiker Thermal Terima Kasih">
         <Tag class="w-3.5 h-3.5 text-slate-500" />
         <span class="hidden lg:inline">Stiker Thermal</span>
       </a>
 
-      <button onclick="directPrintLatestResi()" class="btn-tactile flex items-center gap-2 ps-2.5 pe-3.5 py-2 text-xs font-bold rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm shadow-indigo-500/20" title="Langsung Cetak Resi Terbaru ke Printer 80mm">
+      <button onclick="directPrintLatestResi()" class="btn-tactile flex items-center gap-2 ps-2.5 pe-3.5 py-2 text-xs font-bold rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 text-white hover:from-indigo-700 hover:to-indigo-800 shadow-sm shadow-indigo-500/25" title="Langsung Cetak Resi Terbaru ke Printer 80mm">
         <Printer class="w-3.5 h-3.5 stroke-[2.5]" />
         <span class="hidden sm:inline">Langsung Cetak Resi</span>
         <span id="resiStatusDot" class="w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-indigo-400" title="Resi Printer Siap"></span>
       </button>
 
-      <button onclick="openResiModal()" class="btn-tactile flex items-center gap-1.5 ps-2 pe-3 py-2 text-xs font-semibold rounded-lg bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 shadow-sm" title="Daftar & Upload File Resi">
+      <button onclick="openResiModal()" class="btn-tactile flex items-center gap-1.5 ps-2 pe-3 py-2 text-xs font-semibold rounded-xl bg-white text-slate-700 border border-slate-200/90 hover:bg-slate-50 shadow-xs" title="Daftar & Upload File Resi">
         <FolderClock class="w-3.5 h-3.5 text-slate-500" />
         <span class="hidden md:inline">Daftar Resi</span>
       </button>

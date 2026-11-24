@@ -86,8 +86,8 @@ function switchTab(tab) {
   const contentBookkeeping = document.getElementById('tabContentBookkeeping');
   const contentAds = document.getElementById('tabContentAds');
 
-  const activeClass = 'py-3 px-1 text-xs sm:text-sm font-bold border-b-2 border-amber-500 text-amber-600 flex items-center gap-2 transition-colors';
-  const inactiveClass = 'py-3 px-1 text-xs sm:text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-900 flex items-center gap-2 transition-colors';
+  const activeClass = 'btn-tactile px-3.5 sm:px-4 py-2 text-xs sm:text-sm font-bold rounded-xl bg-white text-slate-900 shadow-sm border border-slate-200/90 flex items-center gap-2 transition-all whitespace-nowrap';
+  const inactiveClass = 'btn-tactile px-3.5 sm:px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl text-slate-600 hover:text-slate-900 hover:bg-white/60 flex items-center gap-2 transition-all whitespace-nowrap';
 
   // Reset all
   btnOrders.className = inactiveClass;
