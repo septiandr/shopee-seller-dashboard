@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Optional
 
 from fastapi import FastAPI, UploadFile, File, Query, HTTPException
-from fastapi.responses import FileResponse, HTMLResponse
+from fastapi.responses import FileResponse, HTMLResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 import openpyxl
@@ -1420,6 +1420,57 @@ def api_resi_view_pdf(filename: str, include_card: bool = False):
             pass
             
     return FileResponse(path=str(pdf_path), filename=filename, media_type="application/pdf")
+
+@app.get("/api/resi/image/{filename}")
+def api_resi_image(
+    filename: str, 
+    card: bool = True, 
+    threshold: int = 180, 
+    page: int = 1,
+    dots: int = 576
+):
+    import os, glob, subprocess, tempfile, io
+    from PIL import Image
+
+    pdf_path = RESI_DIR / filename
+    if not pdf_path.exists():
+        raise HTTPException(status_code=404, detail="File resi tidak ditemukan")
+
+    tmpdir = tempfile.mkdtemp(prefix="resi_img_")
+    render_bin = RESI_PRINTER_DIR / "bin/render-pdf"
+    if render_bin.exists():
+        subprocess.run([str(render_bin), str(pdf_path), tmpdir, "300"], check=True)
+        page_files = sorted(glob.glob(os.path.join(tmpdir, "page-*.png")))
+    else:
+        subprocess.run(["qlmanage", "-t", "-s", "1000", "-o", tmpdir, str(pdf_path)], check=True)
+        page_files = sorted(glob.glob(os.path.join(tmpdir, "*.png")))
+
+    if not page_files:
+        raise HTTPException(status_code=500, detail="Gagal merender resi PDF")
+
+    page_idx = max(0, min(len(page_files) - 1, page - 1))
+    target_page_file = page_files[page_idx]
+
+    resi_im = Image.open(target_page_file).convert("L")
+    rw, rh = resi_im.size
+    target_h = int(rh * (dots / rw))
+    resi_scaled = resi_im.resize((dots, target_h), Image.Resampling.LANCZOS)
+
+    if card:
+        card_im = create_thank_you_card(width=dots)
+        comb = Image.new("L", (dots, target_h + card_im.height), 255)
+        comb.paste(resi_scaled, (0, 0))
+        comb.paste(card_im, (0, target_h))
+        final_im = comb
+    else:
+        final_im = resi_scaled
+
+    # Apply threshold for deep black dots on 80mm thermal paper
+    final_bw = final_im.point(lambda p: 255 if p > threshold else 0, mode="1")
+
+    buf = io.BytesIO()
+    final_bw.save(buf, format="PNG")
+    return Response(content=buf.getvalue(), media_type="image/png")
 
 @app.post("/api/resi/upload")
 async def api_resi_upload(file: UploadFile = File(...)):

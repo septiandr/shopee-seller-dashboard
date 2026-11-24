@@ -244,7 +244,7 @@ async function loadOrders() {
         (rf.tracking_no && rf.tracking_no !== '-' && o.tracking_no && o.tracking_no.includes(rf.tracking_no))
       );
       const resiPrintBtn = matchedResi
-        ? `<button onclick="printResiBle('${escapeHtml(matchedResi.filename)}', event)" class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 mt-1 ml-1" title="Cetak label resi ${escapeHtml(matchedResi.filename)} ke Printer BLE"><i data-lucide="printer" class="w-3 h-3"></i> Cetak Resi</button>`
+        ? `<button onclick="openPrintResi('${escapeHtml(matchedResi.filename)}', event)" class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 mt-1 ml-1" title="Cetak label resi ${escapeHtml(matchedResi.filename)} ke Printer 80mm"><i data-lucide="printer" class="w-3 h-3"></i> Cetak Resi 80mm</button>`
         : '';
 
       return `
@@ -2024,23 +2024,23 @@ async function loadResiFiles() {
             </td>
             <td class="py-2.5 px-3 text-right">
               <div class="flex items-center justify-end gap-1.5">
-                <button onclick="printResiBle('${escapeHtml(rf.filename)}')" 
+                <button onclick="openPrintResi('${escapeHtml(rf.filename)}')" 
                         class="btn-tactile px-2.5 py-1 text-xs font-bold rounded bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm flex items-center gap-1"
-                        title="Cetak langsung ke printer Bluetooth (RPP02N)">
+                        title="Buka pratinjau & cetak langsung ke printer 80mm">
                   <i data-lucide="printer" class="w-3 h-3"></i>
-                  <span>Cetak BLE</span>
+                  <span>Cetak 80mm</span>
                 </button>
                 <a href="/api/resi/pdf/${encodeURIComponent(rf.filename)}?include_card=1" target="_blank" 
                    class="btn-tactile px-2 py-1 text-xs font-bold rounded border border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100 flex items-center gap-1"
-                   title="Lihat Pratinjau Resi + Kartu Bintang 5">
+                   title="Lihat Pratinjau PDF Resi + Kartu Bintang 5">
                   <i data-lucide="eye" class="w-3 h-3 text-amber-600"></i>
-                  <span class="hidden sm:inline">Resi+Kartu</span>
+                  <span class="hidden sm:inline">PDF</span>
                 </a>
-                <a href="/api/resi/pdf/${encodeURIComponent(rf.filename)}" target="_blank" 
-                   class="btn-tactile px-1.5 py-1 text-xs rounded border border-slate-200 text-slate-500 hover:bg-slate-100 flex items-center gap-1"
-                   title="Lihat Label Resi Asli (Tanpa Kartu)">
-                  <i data-lucide="file-text" class="w-3 h-3"></i>
-                </a>
+                <button onclick="printResiBle('${escapeHtml(rf.filename)}')" 
+                        class="btn-tactile px-1.5 py-1 text-xs rounded border border-slate-200 text-slate-500 hover:bg-slate-100 flex items-center gap-1"
+                        title="Kirim lewat Bluetooth BLE">
+                  <i data-lucide="bluetooth" class="w-3 h-3"></i>
+                </button>
               </div>
             </td>
           </tr>
@@ -2056,6 +2056,17 @@ async function loadResiFiles() {
   } finally {
     if (icon) icon.classList.remove('animate-spin');
   }
+}
+
+function openPrintResi(filename, event = null) {
+  if (event) event.stopPropagation();
+  const checkEl = document.getElementById('checkIncludeCard');
+  const includeCard = checkEl ? (checkEl.checked ? '1' : '0') : '1';
+  const threshEl = document.getElementById('selectResiThreshold');
+  const thresholdVal = threshEl ? threshEl.value : '180';
+
+  const url = `/static/print-resi.html?file=${encodeURIComponent(filename)}&card=${includeCard}&threshold=${thresholdVal}`;
+  window.open(url, '_blank');
 }
 
 async function printResiBle(filename, event = null) {
