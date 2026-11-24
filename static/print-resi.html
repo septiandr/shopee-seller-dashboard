@@ -266,7 +266,14 @@
       </label>
 
       <div class="select-group">
-        <span class="select-label">Gelap &ge;:</span>
+        <span class="select-label">Desain Kartu:</span>
+        <select id="selectStyle" class="select-control" onchange="updatePreview()">
+          <option value="1" selected>Desain 1: Hero Banner (Rekomendasi)</option>
+          <option value="2">Desain 2: Swiss Editorial</option>
+          <option value="3">Desain 3: Voucher Ticket</option>
+        </select>
+
+        <span class="select-label" style="margin-left: 6px;">Gelap &ge;:</span>
         <select id="selectThreshold" class="select-control" onchange="updatePreview()">
           <option value="128">128 - Standar</option>
           <option value="160">160 - Sedang</option>
@@ -326,6 +333,7 @@
 
     function updatePreview() {
       const card = document.getElementById('checkCard').checked ? 1 : 0;
+      const style = document.getElementById('selectStyle').value || 1;
       const threshold = document.getElementById('selectThreshold').value;
       const page = document.getElementById('selectPage').value || 1;
       
@@ -333,7 +341,7 @@
       const overlay = document.getElementById('loadingOverlay');
       overlay.style.display = 'flex';
 
-      const srcUrl = `/api/resi/image/${encodeURIComponent(filename)}?card=${card}&threshold=${threshold}&page=${page}&dots=576&_t=${Date.now()}`;
+      const srcUrl = `/api/resi/image/${encodeURIComponent(filename)}?card=${card}&style=${style}&threshold=${threshold}&page=${page}&dots=576&_t=${Date.now()}`;
       img.onload = () => {
         overlay.style.display = 'none';
       };
