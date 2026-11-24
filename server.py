@@ -1655,7 +1655,7 @@ async def api_resi_upload(file: UploadFile = File(...)):
 
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
-@app.get("/")
+@app.api_route("/", methods=["GET", "HEAD"])
 def serve_index():
     index_file = STATIC_DIR / "index.html"
     return HTMLResponse(content=index_file.read_text(encoding="utf-8"))
