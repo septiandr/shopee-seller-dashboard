@@ -1245,6 +1245,22 @@ def api_resi_files():
         files.append(info)
     return {"status": "success", "files": files}
 
+def draw_star_polygon(draw, cx: float, cy: float, r_outer: float, r_inner: float, fill: int = 255, outline=None):
+    import math
+    points = []
+    for i in range(10):
+        r = r_outer if i % 2 == 0 else r_inner
+        angle = i * math.pi / 5 - math.pi / 2
+        x = cx + r * math.cos(angle)
+        y = cy + r * math.sin(angle)
+        points.append((x, y))
+    draw.polygon(points, fill=fill, outline=outline)
+
+def draw_five_stars_vector(draw, cx: float, cy: float, r_outer: float = 12, r_inner: float = 5.5, spacing: float = 28, fill: int = 255):
+    start_x = cx - 2 * spacing
+    for i in range(5):
+        draw_star_polygon(draw, start_x + i * spacing, cy, r_outer, r_inner, fill=fill)
+
 def create_thank_you_card(width: int = 576, height: int = 160, shop_name: str = 'TOKO ZERA', username: str = 'shopee.co.id/septiandr', style: int = 1):
     """
     Thanks Card ukuran presisi 80 x 20 mm (576 x 160 dots pada 203 DPI).
@@ -1260,13 +1276,12 @@ def create_thank_you_card(width: int = 576, height: int = 160, shop_name: str = 
     try:
         f_brand = ImageFont.truetype('/System/Library/Fonts/Supplemental/Arial Black.ttf', 12)
         f_heavy = ImageFont.truetype('/System/Library/Fonts/Supplemental/Arial Black.ttf', 16)
-        f_stars = ImageFont.truetype('/System/Library/Fonts/Supplemental/Arial.ttf', 24)
         f_bold = ImageFont.truetype('/System/Library/Fonts/Helvetica.ttc', 11, index=1)
         f_reg = ImageFont.truetype('/System/Library/Fonts/Helvetica.ttc', 10, index=0)
         f_tiny = ImageFont.truetype('/System/Library/Fonts/Helvetica.ttc', 9, index=0)
         f_sc = ImageFont.truetype('/System/Library/Fonts/Supplemental/Arial.ttf', 9)
     except Exception:
-        f_brand = f_heavy = f_stars = f_bold = f_reg = f_tiny = f_sc = ImageFont.load_default()
+        f_brand = f_heavy = f_bold = f_reg = f_tiny = f_sc = ImageFont.load_default()
 
     if style == 1:
         # Style 1: Modern Hero Banner (Rekomendasi - Terbaca Jelas, Elegan, Kontras Tinggi)
@@ -1282,16 +1297,14 @@ def create_thank_you_card(width: int = 576, height: int = 160, shop_name: str = 
         draw.text((width - 170, 24), username, fill=0, font=f_tiny)
         draw.line([(10, 44), (width - 10, 44)], fill=0, width=1)
 
-        # Baris 2: Solid Black Hero Bar (Bintang 5 & CTA)
+        # Baris 2: Solid Black Hero Bar (Bintang 5 Vektor Solid & CTA)
         draw.rectangle([(10, 45), (width - 10, 105)], fill=0)
-        stars = '★ ★ ★ ★ ★'
-        st_bb = draw.textbbox((0, 0), stars, font=f_stars)
-        st_w = st_bb[2] - st_bb[0]
-        draw.text(((width - st_w)//2, 48), stars, fill=255, font=f_stars)
+        # Gambar 5 Bintang Vektor Tebal Pure White (255)
+        draw_five_stars_vector(draw, cx=width // 2, cy=64, r_outer=13, r_inner=6, spacing=32, fill=255)
 
         cta = 'MOHON BANTU DENGAN FOTO & BINTANG 5'
         cta_bb = draw.textbbox((0, 0), cta, font=f_brand)
-        draw.text(((width - (cta_bb[2]-cta_bb[0]))//2, 80), cta, fill=255, font=f_brand)
+        draw.text(((width - (cta_bb[2]-cta_bb[0]))//2, 85), cta, fill=255, font=f_brand)
 
         # Baris 3: Garansi & Solusi Komplain
         draw.text((24, 114), 'GARANSI 100% GANTI BARU:', fill=0, font=f_brand)
@@ -1313,10 +1326,9 @@ def create_thank_you_card(width: int = 576, height: int = 160, shop_name: str = 
 
         rx = 345
         draw.rounded_rectangle([(rx, 14), (width - 14, height - 8)], radius=6, fill=0)
-        stars = '★ ★ ★ ★ ★'
-        st_bb = draw.textbbox((0, 0), stars, font=f_stars)
-        st_w = st_bb[2] - st_bb[0]
-        draw.text((rx + (width - 14 - rx - st_w)//2, 22), stars, fill=255, font=f_stars)
+        badge_center_x = rx + (width - 14 - rx) // 2
+        draw_five_stars_vector(draw, cx=badge_center_x, cy=34, r_outer=10, r_inner=4.5, spacing=20, fill=255)
+        
         draw.text((rx + 16, 56), 'GARANSI GANTI BARU 100%', fill=255, font=f_bold)
         draw.line([(rx + 16, 74), (width - 30, 74)], fill=255, width=1)
         draw.text((rx + 16, 82), 'Ada kendala / baut kurang?', fill=255, font=f_tiny)
@@ -1335,8 +1347,10 @@ def create_thank_you_card(width: int = 576, height: int = 160, shop_name: str = 
 
         draw.text((24, 20), shop_name, fill=0, font=f_brand)
         draw.text((120, 21), '•  KARTU TERIMA KASIH', fill=0, font=f_bold)
-        draw.text((24, 44), '★ ★ ★ ★ ★', fill=0, font=f_stars)
+        
+        draw_five_stars_vector(draw, cx=80, cy=52, r_outer=11, r_inner=5, spacing=22, fill=0)
         draw.text((150, 48), 'MOHON BINTANG 5 & FOTO YA KAK!', fill=0, font=f_bold)
+        
         draw.text((24, 76), 'Ulasan positif dan foto produk Anda sangat membantu toko kami.', fill=0, font=f_reg)
         draw.text((24, 94), 'Jika puas, luangkan 1 menit untuk memberi bintang 5.', fill=0, font=f_reg)
         draw.text((24, 120), f'Kunjungi toko: {username}', fill=0, font=f_tiny)
@@ -1345,7 +1359,7 @@ def create_thank_you_card(width: int = 576, height: int = 160, shop_name: str = 
         draw.text((382, 24), 'GARANSI 100%', fill=255, font=f_brand)
         draw.text((372, 52), 'Ada masalah paket?', fill=0, font=f_bold)
         draw.text((372, 68), 'Barang patah / kurang?', fill=0, font=f_reg)
-        draw.text((372, 88), 'JANGAN REVIEW BURUK', fill=0, font=f_bold)
+        draw.text((372, 88), 'JANGAN REVIEW BURUK', fill=0, font=font_bold if 'font_bold' in locals() else f_bold)
         draw.text((372, 104), 'Chat admin di Shopee,', fill=0, font=f_reg)
         draw.text((372, 120), 'KAMI GANTI BARU!', fill=0, font=f_brand)
 
