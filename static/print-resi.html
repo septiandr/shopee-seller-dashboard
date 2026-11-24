@@ -203,6 +203,56 @@
       color: #0f172a;
     }
 
+    .btn-resi-web {
+      background: #eef2ff;
+      color: #4f46e5;
+      border: 1px solid #c7d2fe;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 8px 14px;
+      border-radius: 8px;
+      text-decoration: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s;
+    }
+
+    .btn-resi-web:hover {
+      background: #e0e7ff;
+      border-color: #818cf8;
+      color: #3730a3;
+    }
+
+    .page-separator {
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f1f5f9;
+      color: #64748b;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      border-top: 2px dashed #cbd5e1;
+      border-bottom: 2px dashed #cbd5e1;
+      user-select: none;
+      margin: 8px 0;
+    }
+
+    .paper-page {
+      width: 100%;
+      position: relative;
+    }
+
+    .paper-page img {
+      width: 100%;
+      display: block;
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: crisp-edges;
+    }
+
     /* PRINT STYLES FOR 80mm THERMAL PRINTER */
     @media print {
       @page {
@@ -232,10 +282,24 @@
         width: 80mm !important;
         max-width: 80mm !important;
         margin: 0 !important;
+        padding: 0 !important;
       }
 
-      .paper-80mm img {
+      .paper-page {
+        page-break-after: always !important;
+        break-after: page !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+
+      .paper-page:last-child {
+        page-break-after: avoid !important;
+        break-after: avoid !important;
+      }
+
+      .paper-page img {
         width: 100% !important;
+        display: block !important;
       }
     }
   </style>
@@ -247,11 +311,15 @@
     <div class="controls-row-top">
       <div class="title-group">
         <h1>🖨️ Cetak Resi Thermal 80mm + Thanks Card</h1>
-        <p id="resiSubTitle">File: <strong id="lblFilename">Memuat...</strong> | Format: <strong>80mm Roll (1 Resi + 1 Thanks Card 80×20 mm)</strong></p>
+        <p id="resiSubTitle">File: <strong id="lblFilename">Memuat...</strong> | Format: <strong>80mm Roll (1 Resi + 1 Thanks Card 80×20 mm per Label)</strong></p>
       </div>
 
       <div class="action-group">
         <a href="/" class="btn-back">← Dashboard</a>
+        <a href="http://127.0.0.1:8137" target="_blank" class="btn-resi-web" title="Buka Resi Web UI (Platform Bluetooth di port 8137)">
+          <svg style="width:14px;height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+          Buka Resi Web (Port 8137)
+        </a>
         <button onclick="window.print()" class="btn-print">
           🖨️ Cetak / Print Sekarang
         </button>
@@ -262,7 +330,7 @@
     <div class="controls-row-bottom">
       <label class="toggle-card-label" title="Centang untuk mencetak 1 Resi + 1 Thanks Card (80 x 20 mm) tersambung di bawah">
         <input type="checkbox" id="checkCard" checked onchange="updatePreview()">
-        <span>⭐ Sertakan Thanks Card (80 × 20 mm) di Bawah Resi</span>
+        <span>⭐ Sertakan Thanks Card (80 × 20 mm) di Bawah Tiap Resi</span>
       </label>
 
       <div class="select-group">
@@ -282,9 +350,9 @@
           <option value="220">220 - Maksimal</option>
         </select>
 
-        <span class="select-label" style="margin-left: 6px;">Halaman:</span>
+        <span class="select-label" style="margin-left: 6px;">Tampilan:</span>
         <select id="selectPage" class="select-control" onchange="updatePreview()">
-          <option value="1" selected>Hal 1</option>
+          <option value="all" selected>Semua Halaman</option>
         </select>
       </div>
     </div>
@@ -294,7 +362,7 @@
   <div class="thermal-stage">
     <div class="paper-80mm" id="paperContainer">
       <div class="loading-overlay" id="loadingOverlay">Memuat render 80mm...</div>
-      <img id="resiImage" src="" alt="Pratinjau Resi 80mm">
+      <div id="paperPagesContainer"></div>
     </div>
   </div>
 
@@ -303,11 +371,14 @@
     const filename = params.get('file') || 'BT-4.pdf';
     const initialCard = params.get('card') !== '0';
     const initialThreshold = params.get('threshold') || '180';
-    const initialPage = parseInt(params.get('page') || '1', 10);
+    const initialStyle = params.get('style') || '1';
 
     document.getElementById('lblFilename').textContent = filename;
     document.getElementById('checkCard').checked = initialCard;
     document.getElementById('selectThreshold').value = initialThreshold;
+    document.getElementById('selectStyle').value = initialStyle;
+
+    let totalPages = 1;
 
     // Load available pages count for this resi
     async function initPageList() {
@@ -315,15 +386,26 @@
         const res = await fetch('/api/resi/files');
         const data = await res.json();
         const cur = (data.files || []).find(f => f.filename === filename);
-        if (cur && cur.pages > 1) {
+        if (cur) {
+          totalPages = Math.max(1, cur.pages || 1);
+          document.getElementById('lblFilename').textContent = `${filename} (${totalPages} Label)`;
+          
           const sel = document.getElementById('selectPage');
           sel.innerHTML = '';
-          for (let p = 1; p <= cur.pages; p++) {
-            const opt = document.createElement('option');
-            opt.value = p;
-            opt.textContent = `Hal ${p} dari ${cur.pages}`;
-            if (p === initialPage) opt.selected = true;
-            sel.appendChild(opt);
+          
+          const optAll = document.createElement('option');
+          optAll.value = 'all';
+          optAll.textContent = `Semua Halaman (${totalPages} Label)`;
+          optAll.selected = true;
+          sel.appendChild(optAll);
+
+          if (totalPages > 1) {
+            for (let p = 1; p <= totalPages; p++) {
+              const opt = document.createElement('option');
+              opt.value = p;
+              opt.textContent = `Halaman ${p} Saja`;
+              sel.appendChild(opt);
+            }
           }
         }
       } catch (e) {
@@ -335,21 +417,51 @@
       const card = document.getElementById('checkCard').checked ? 1 : 0;
       const style = document.getElementById('selectStyle').value || 1;
       const threshold = document.getElementById('selectThreshold').value;
-      const page = document.getElementById('selectPage').value || 1;
+      const pageSelection = document.getElementById('selectPage').value || 'all';
       
-      const img = document.getElementById('resiImage');
+      const container = document.getElementById('paperPagesContainer');
       const overlay = document.getElementById('loadingOverlay');
       overlay.style.display = 'flex';
 
-      const srcUrl = `/api/resi/image/${encodeURIComponent(filename)}?card=${card}&style=${style}&threshold=${threshold}&page=${page}&dots=576&_t=${Date.now()}`;
-      img.onload = () => {
-        overlay.style.display = 'none';
-      };
-      img.onerror = () => {
-        overlay.style.display = 'none';
-        alert('Gagal merender resi. Pastikan file PDF ada di folder resi/.');
-      };
-      img.src = srcUrl;
+      const pagesToRender = pageSelection === 'all' 
+        ? Array.from({ length: totalPages }, (_, i) => i + 1)
+        : [parseInt(pageSelection, 10)];
+
+      container.innerHTML = '';
+      let loadedCount = 0;
+      const totalToLoad = pagesToRender.length;
+
+      pagesToRender.forEach((p, idx) => {
+        if (idx > 0) {
+          const sep = document.createElement('div');
+          sep.className = 'page-separator no-print';
+          sep.textContent = `✂ PEMBATAS ANTAR RESI (HALAMAN ${p}) ✂`;
+          container.appendChild(sep);
+        }
+
+        const pageWrap = document.createElement('div');
+        pageWrap.className = 'paper-page';
+
+        const img = document.createElement('img');
+        img.alt = `Resi Hal ${p}`;
+        img.src = `/api/resi/image/${encodeURIComponent(filename)}?card=${card}&style=${style}&threshold=${threshold}&page=${p}&dots=576&_t=${Date.now()}`;
+        
+        img.onload = () => {
+          loadedCount++;
+          if (loadedCount >= totalToLoad) {
+            overlay.style.display = 'none';
+          }
+        };
+        img.onerror = () => {
+          loadedCount++;
+          if (loadedCount >= totalToLoad) {
+            overlay.style.display = 'none';
+          }
+        };
+
+        pageWrap.appendChild(img);
+        container.appendChild(pageWrap);
+      });
     }
 
     initPageList().then(() => {
