@@ -16,31 +16,16 @@ import {
 
 <div id="tabContentAds" class="space-y-6 hidden">
   
-  <!-- Top Action Bar for Ads -->
-  <div class="flex flex-wrap items-center justify-between gap-4 p-5 rounded-2xl bg-gradient-to-r from-orange-500/10 via-orange-50/60 to-white border border-orange-200/80 shadow-xs">
-    <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-xl bg-orange-600 text-white flex items-center justify-center shadow-sm shadow-orange-600/25 shrink-0">
-        <Target class="w-5 h-5 stroke-[2.2]" />
-      </div>
-      <div>
-        <h2 class="text-sm sm:text-base font-extrabold text-slate-900 tracking-tight">
-          Evaluasi Efektivitas Iklan Shopee (GMV Max ROAS)
-        </h2>
-        <p class="text-xs text-slate-500 mt-0.5">Data tersinkron otomatis dari file CSV di folder <code class="text-amber-800 font-semibold font-mono text-[11px]">~/Downloads/iklan/</code>.</p>
-      </div>
+  <!-- Clean Tab Header (Bebas dari Banner Menabrak) -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1 border-b border-slate-200/60">
+    <div>
+      <h2 class="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight">
+        Performa Iklan & ROAS (GMV Max)
+      </h2>
+      <p class="text-xs text-slate-500">Evaluasi efektivitas biaya iklan, ROAS aktual, dan konversi pesanan dari file CSV.</p>
     </div>
-
-    <div class="flex items-center gap-2">
-      <a href="https://seller.shopee.co.id/portal/marketing/pas/index?source_page_id=1&view_mode=classic&type=new_cpc_homepage" 
-         target="_blank" 
-         rel="noopener noreferrer" 
-         onclick="openShopeePage('ads', event)"
-         class="btn-tactile flex items-center gap-2 ps-3 pe-4 py-2 text-xs font-bold rounded-xl bg-orange-600 text-white hover:bg-orange-700 shadow-sm shadow-orange-500/25"
-         title="Buka Halaman Iklan Shopee di Brave Browser (Profile: sdrisanggalih)">
-        <Target class="w-4 h-4" />
-        <span>Buka Shopee Iklan</span>
-      </a>
-      <button onclick="syncAdsData()" class="btn-tactile flex items-center gap-2 ps-3 pe-4 py-2 text-xs font-bold rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm shadow-emerald-600/20">
+    <div class="flex items-center gap-2 self-start sm:self-auto">
+      <button onclick="syncAdsData()" class="btn-tactile flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold rounded-xl bg-orange-600 text-white hover:bg-orange-700 shadow-sm shadow-orange-500/20">
         <RefreshCw class="w-4 h-4" id="iconSyncAds" />
         <span>Sinkronkan Iklan</span>
       </button>
@@ -48,7 +33,7 @@ import {
   </div>
 
   <!-- Ads KPI Summary Cards -->
-  <section class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5">
+  <section class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-3.5">
     
     <!-- Total Biaya Iklan -->
     <div class="card-clean p-4 flex flex-col justify-between border-rose-200/80 bg-rose-50/40">

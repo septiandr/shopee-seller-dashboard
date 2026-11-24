@@ -24,50 +24,19 @@ import {
 
 <div id="tabContentOrders" class="space-y-6">
   
-  <!-- Top Action Bar for Orders -->
-  <div class="flex flex-wrap items-center justify-between gap-4 p-5 rounded-2xl bg-gradient-to-r from-amber-500/10 via-amber-50/60 to-white border border-amber-200/80 shadow-xs">
-    <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center shadow-sm shadow-amber-500/25 shrink-0">
-        <ShoppingBag class="w-5 h-5 stroke-[2.2]" />
-      </div>
-      <div>
-        <h2 class="text-sm sm:text-base font-extrabold text-slate-900 tracking-tight">
-          Analitik & Pembukuan Pesanan Shopee
-        </h2>
-        <p class="text-xs text-slate-500 mt-0.5">Pantau performa penjualan, pesanan masuk, omzet, dan margin laba bersih produk cover knalpot.</p>
-      </div>
+  <!-- Clean Tab Header (Bebas dari Banner Menabrak & Duplikasi Tombol) -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-1 border-b border-slate-200/60">
+    <div>
+      <h2 class="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight">
+        Analitik Pesanan & Penjualan
+      </h2>
+      <p class="text-xs text-slate-500">Performa harian, omzet kotor, potongan admin Shopee, modal HPP, dan laba bersih.</p>
     </div>
-    
-    <div class="flex flex-wrap items-center gap-2">
-      <button onclick="directPrintLatestResi()" 
-              class="btn-tactile flex items-center gap-2 ps-3 pe-4 py-2 text-xs font-bold rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm shadow-indigo-500/20"
-              title="Langsung Cetak Resi Terbaru ke Printer 80mm">
-        <Printer class="w-4 h-4 stroke-[2.5]" />
-        <span>Langsung Cetak Resi</span>
-        <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-indigo-800 text-indigo-100 font-mono-num" id="badgeResiCountTab">0</span>
-      </button>
-      <button onclick="openResiModal()" 
-              class="btn-tactile flex items-center gap-1.5 ps-2.5 pe-3.5 py-2 text-xs font-semibold rounded-xl bg-white text-slate-700 border border-slate-300/80 hover:bg-slate-50 shadow-sm"
-              title="Buka Daftar File Resi & Upload PDF">
-        <FolderClock class="w-4 h-4 text-slate-600" />
-        <span>Daftar Resi</span>
-      </button>
-      <a href="/thermal-card" 
-         target="_blank" 
-         class="btn-tactile flex items-center gap-2 ps-3 pe-4 py-2 text-xs font-bold rounded-xl bg-white text-slate-700 border border-slate-300/80 hover:bg-slate-50 shadow-sm"
-         title="Cetak Stiker Kartu Ucapan Terima Kasih (Thermal Printer)">
-        <Tag class="w-4 h-4 text-slate-600" />
-        <span>Stiker Terima Kasih</span>
-      </a>
-      <a href="https://seller.shopee.co.id/portal/sale/order" 
-         target="_blank" 
-         rel="noopener noreferrer" 
-         onclick="openShopeePage('order', event)"
-         class="btn-tactile flex items-center gap-2 ps-3 pe-4 py-2 text-xs font-bold rounded-xl bg-amber-500 text-white hover:bg-amber-600 shadow-sm shadow-amber-500/25"
-         title="Buka Halaman Penjualan / Pesanan Shopee di Brave Browser (Profile: sdrisanggalih)">
-        <ExternalLink class="w-4 h-4" />
-        <span>Buka Shopee Penjualan</span>
-      </a>
+    <div class="flex items-center gap-2 self-start sm:self-auto text-xs">
+      <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-amber-50 text-amber-800 border border-amber-200/80 font-semibold font-mono-num">
+        <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+        <span id="badgeResiCountTab">0</span> Resi Aktif
+      </span>
     </div>
   </div>
 
@@ -75,7 +44,7 @@ import {
   <QuickInsights />
 
   <!-- Overview Metric Cards (KPI Cards) -->
-  <section class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5">
+  <section class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-3.5">
     
     <!-- Subtotal Omzet -->
     <div class="card-clean p-4 flex flex-col justify-between">
@@ -304,12 +273,12 @@ import {
 
   </section>
 
-  <!-- Filters & Search Toolbar -->
+  <!-- Filters & Search Toolbar (Terstruktur 2 Baris, Anti-Tabrakan) -->
   <section class="card-clean p-4 space-y-3">
-    <div class="flex flex-wrap items-center justify-between gap-3">
-      
+    <!-- Baris 1: Filter Periode & Pencarian Cepat -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       <!-- Period Segmented Buttons -->
-      <div class="flex items-center bg-slate-100/90 p-1 rounded-xl border border-slate-200/80 text-xs gap-0.5 shadow-inner">
+      <div class="inline-flex items-center bg-slate-100/90 p-1 rounded-xl border border-slate-200/80 text-xs gap-0.5 shadow-inner overflow-x-auto">
         <button onclick="setPeriod('all')" class="period-btn px-3 py-1.5 rounded-lg font-bold text-slate-900 bg-white shadow-xs" data-period="all">Semua</button>
         <button onclick="setPeriod('today')" class="period-btn px-3 py-1.5 rounded-lg font-medium text-slate-600 hover:text-slate-900" data-period="today">Hari Ini</button>
         <button onclick="setPeriod('yesterday')" class="period-btn px-3 py-1.5 rounded-lg font-medium text-slate-600 hover:text-slate-900" data-period="yesterday">Kemarin</button>
@@ -317,37 +286,38 @@ import {
         <button onclick="setPeriod('30days')" class="period-btn px-3 py-1.5 rounded-lg font-medium text-slate-600 hover:text-slate-900" data-period="30days">30 Hari</button>
       </div>
 
-      <div class="flex flex-wrap items-center gap-2">
-        <select id="filterBolt" onchange="applyFilters()" class="text-xs bg-white border border-slate-200/90 text-slate-700 rounded-lg px-3 py-2 outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 shadow-xs">
-          <option value="all">Semua Varian Baut</option>
-          <option value="1">🔩 Dengan Baut (+ Rp 2.000)</option>
-          <option value="0">🛡️ Tanpa Baut</option>
-        </select>
-
-        <select id="filterModel" onchange="applyFilters()" class="text-xs bg-white border border-slate-200/90 text-slate-700 rounded-lg px-3 py-2 outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 shadow-xs">
-          <option value="all">Semua Model</option>
-          <option value="Model Old">Model Old</option>
-          <option value="Model New">Model New</option>
-        </select>
-
-        <select id="filterProvince" onchange="applyFilters()" class="text-xs bg-white border border-slate-200/90 text-slate-700 rounded-lg px-3 py-2 outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 shadow-xs">
-          <option value="all">📍 Semua Provinsi</option>
-        </select>
-
-        <select id="filterStatus" onchange="applyFilters()" class="text-xs bg-white border border-slate-200/90 text-slate-700 rounded-lg px-3 py-2 outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 shadow-xs">
-          <option value="all">Semua Status</option>
-          <option value="Sedang Dikirim">Sedang Dikirim</option>
-          <option value="Telah Dikirim">Telah Dikirim</option>
-          <option value="Selesai">Selesai</option>
-          <option value="Batal">Batal</option>
-        </select>
+      <!-- Quick Search Bar -->
+      <div class="relative w-full sm:w-72">
+        <Search class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+        <input type="text" id="searchInput" oninput="debounceSearch()" placeholder="Cari pesanan, resi, kota, jam..." class="w-full text-xs bg-white border border-slate-200/90 text-slate-900 pl-9 pr-3 py-2 rounded-xl outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 placeholder:text-slate-400 shadow-xs">
       </div>
+    </div>
 
-      <div class="relative w-full sm:w-64">
-        <Search class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-        <input type="text" id="searchInput" oninput="debounceSearch()" placeholder="Cari jam, pesanan, kota..." class="w-full text-xs bg-white border border-slate-200/90 text-slate-900 pl-9 pr-3 py-2 rounded-lg outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 placeholder:text-slate-400 shadow-xs">
-      </div>
+    <!-- Baris 2: Filter Dropdown Grid (Presisi 4 Kolom) -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-2.5 pt-3 border-t border-slate-100">
+      <select id="filterBolt" onchange="applyFilters()" class="text-xs bg-white border border-slate-200/90 text-slate-700 rounded-xl px-3 py-2 outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 shadow-xs">
+        <option value="all">Semua Varian Baut</option>
+        <option value="1">🔩 Dengan Baut (+ Rp 2.000)</option>
+        <option value="0">🛡️ Tanpa Baut</option>
+      </select>
 
+      <select id="filterModel" onchange="applyFilters()" class="text-xs bg-white border border-slate-200/90 text-slate-700 rounded-xl px-3 py-2 outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 shadow-xs">
+        <option value="all">Semua Model</option>
+        <option value="Model Old">Model Old</option>
+        <option value="Model New">Model New</option>
+      </select>
+
+      <select id="filterProvince" onchange="applyFilters()" class="text-xs bg-white border border-slate-200/90 text-slate-700 rounded-xl px-3 py-2 outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 shadow-xs">
+        <option value="all">📍 Semua Provinsi</option>
+      </select>
+
+      <select id="filterStatus" onchange="applyFilters()" class="text-xs bg-white border border-slate-200/90 text-slate-700 rounded-xl px-3 py-2 outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 shadow-xs">
+        <option value="all">Semua Status</option>
+        <option value="Sedang Dikirim">Sedang Dikirim</option>
+        <option value="Telah Dikirim">Telah Dikirim</option>
+        <option value="Selesai">Selesai</option>
+        <option value="Batal">Batal</option>
+      </select>
     </div>
   </section>
 

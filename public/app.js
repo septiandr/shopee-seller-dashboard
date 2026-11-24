@@ -262,48 +262,48 @@ async function loadOrders() {
             </div>
           </td>
 
-          <td class="py-3.5 px-4">
-            <div class="flex items-center gap-1.5 font-mono-num font-bold text-amber-700 text-xs">
-              <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-600"></i>
+          <td class="py-3 px-3.5 whitespace-nowrap">
+            <div class="flex items-center gap-1.5 font-mono-num font-bold text-amber-700 text-xs whitespace-nowrap">
+              <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-600 shrink-0"></i>
               ${timeStr}
             </div>
-            <div class="text-[11px] text-slate-500 mt-0.5 font-medium">
+            <div class="text-[11px] text-slate-500 mt-0.5 font-medium whitespace-nowrap">
               ${dateStr}
             </div>
           </td>
 
-          <td class="py-3.5 px-4 max-w-[210px]">
+          <td class="py-3 px-3.5 max-w-[190px]">
             <div class="font-bold text-slate-900 flex items-center gap-1 truncate" title="${escapeHtml(o.city || '')}">
               <i data-lucide="map-pin" class="w-3.5 h-3.5 text-emerald-600 shrink-0"></i>
-              <span>${escapeHtml(o.city || '-')}</span>
+              <span class="truncate">${escapeHtml(o.city || '-')}</span>
             </div>
             <div class="text-[11px] text-slate-500 font-medium truncate">
               ${escapeHtml(o.province || '-')}
             </div>
           </td>
 
-          <td class="py-3.5 px-4">
-            <div class="flex items-center gap-1.5 flex-wrap">
+          <td class="py-3 px-3">
+            <div class="flex items-center gap-1 flex-wrap">
               ${modelBadge}
               ${boltBadge}
               ${packBadge}
             </div>
-            <div class="text-[11px] text-slate-600 mt-1 truncate max-w-[170px]" title="${escapeHtml(o.variation_name)}">
+            <div class="text-[11px] text-slate-600 mt-1 truncate max-w-[160px]" title="${escapeHtml(o.variation_name)}">
               ${escapeHtml(o.variation_name)}
             </div>
           </td>
 
-          <td class="py-3.5 px-3 text-center font-mono-num font-bold text-slate-900">${o.qty}</td>
-          <td class="py-3.5 px-4 text-right font-mono-num font-bold text-slate-900">${formatRp(o.subtotal)}</td>
-          <td class="py-3.5 px-4 text-right font-mono-num text-rose-600 font-medium cursor-help" title="${deductionTooltip}">
+          <td class="py-3 px-2.5 text-center font-mono-num font-bold text-slate-900 whitespace-nowrap">${o.qty}</td>
+          <td class="py-3 px-3 text-right font-mono-num font-bold text-slate-900 whitespace-nowrap">${formatRp(o.subtotal)}</td>
+          <td class="py-3 px-3 text-right font-mono-num text-rose-600 font-medium cursor-help whitespace-nowrap" title="${deductionTooltip}">
             -${formatRp(o.total_shopee_deductions)}
           </td>
-          <td class="py-3.5 px-4 text-right font-mono-num font-semibold text-blue-700">${formatRp(o.net_payout)}</td>
-          <td class="py-3.5 px-4 text-right font-mono-num text-slate-700 font-medium">
+          <td class="py-3 px-3 text-right font-mono-num font-semibold text-blue-700 whitespace-nowrap">${formatRp(o.net_payout)}</td>
+          <td class="py-3 px-3 text-right font-mono-num text-slate-700 font-medium whitespace-nowrap">
             ${formatRp(o.total_hpp)}
           </td>
-          <td class="py-3.5 px-4 text-right font-mono-num font-black text-emerald-700">${formatRp(o.profit)}</td>
-          <td class="py-3.5 px-3 text-center font-mono-num text-[11px]">
+          <td class="py-3 px-3 text-right font-mono-num font-black text-emerald-700 whitespace-nowrap">${formatRp(o.profit)}</td>
+          <td class="py-3 px-2 text-center font-mono-num text-[11px] whitespace-nowrap">
             <span class="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold">${Math.round(o.margin_pct)}%</span>
           </td>
           <td class="py-3.5 px-3 text-center">

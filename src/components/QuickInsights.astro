@@ -2,69 +2,69 @@
 import { Calendar, Clock, TrendingUp, MapPin, Crown, Layers } from 'lucide-astro';
 ---
 
-<section class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+<section class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-3">
   <!-- Hari Terlaris -->
-  <div class="card-ribbon-light p-3 flex items-center gap-2.5">
+  <div class="card-ribbon-light p-3 flex items-center gap-2.5 min-w-0">
     <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 border border-amber-200">
       <Calendar class="w-4 h-4" />
     </div>
-    <div class="truncate">
-      <span class="text-[10px] text-slate-500 block uppercase tracking-wider font-semibold">Hari Terlaris</span>
+    <div class="min-w-0 flex-1">
+      <span class="text-[10px] text-slate-500 block uppercase tracking-wider font-semibold truncate">Hari Terlaris</span>
       <span class="text-xs font-bold text-amber-700 truncate block font-mono-num" id="pillBestDay">Memuat...</span>
     </div>
   </div>
 
   <!-- Jam Tersibuk -->
-  <div class="card-ribbon-light p-3 flex items-center gap-2.5">
+  <div class="card-ribbon-light p-3 flex items-center gap-2.5 min-w-0">
     <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-200">
       <Clock class="w-4 h-4" />
     </div>
-    <div class="truncate">
-      <span class="text-[10px] text-slate-500 block uppercase tracking-wider font-semibold">Jam Tersibuk</span>
+    <div class="min-w-0 flex-1">
+      <span class="text-[10px] text-slate-500 block uppercase tracking-wider font-semibold truncate">Jam Tersibuk</span>
       <span class="text-xs font-bold text-blue-700 truncate block font-mono-num" id="pillBestHour">Memuat...</span>
     </div>
   </div>
 
   <!-- Bulan Terlaris -->
-  <div class="card-ribbon-light p-3 flex items-center gap-2.5">
+  <div class="card-ribbon-light p-3 flex items-center gap-2.5 min-w-0">
     <div class="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center shrink-0 border border-purple-200">
       <TrendingUp class="w-4 h-4" />
     </div>
-    <div class="truncate">
-      <span class="text-[10px] text-slate-500 block uppercase tracking-wider font-semibold">Bulan Terlaris</span>
+    <div class="min-w-0 flex-1">
+      <span class="text-[10px] text-slate-500 block uppercase tracking-wider font-semibold truncate">Bulan Terlaris</span>
       <span class="text-xs font-bold text-purple-700 truncate block font-mono-num" id="pillBestMonth">Memuat...</span>
     </div>
   </div>
 
   <!-- Kota Terlaris -->
-  <div class="card-ribbon-light p-3 flex items-center gap-2.5">
+  <div class="card-ribbon-light p-3 flex items-center gap-2.5 min-w-0">
     <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-200">
       <MapPin class="w-4 h-4" />
     </div>
-    <div class="truncate">
-      <span class="text-[10px] text-slate-500 block uppercase tracking-wider font-semibold">Kota Terlaris</span>
+    <div class="min-w-0 flex-1">
+      <span class="text-[10px] text-slate-500 block uppercase tracking-wider font-semibold truncate">Kota Terlaris</span>
       <span class="text-xs font-bold text-emerald-700 truncate block" id="pillBestCity">Memuat...</span>
     </div>
   </div>
 
   <!-- Produk Top #1 -->
-  <div class="card-ribbon-light p-3 flex items-center gap-2.5 border-amber-300 bg-amber-50/40">
+  <div class="card-ribbon-light p-3 flex items-center gap-2.5 min-w-0 border-amber-300 bg-amber-50/40">
     <div class="w-8 h-8 rounded-lg bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-sm">
       <Crown class="w-4 h-4" />
     </div>
-    <div class="truncate">
-      <span class="text-[10px] text-slate-500 block uppercase tracking-wider font-semibold">Produk Top #1</span>
+    <div class="min-w-0 flex-1">
+      <span class="text-[10px] text-slate-500 block uppercase tracking-wider font-semibold truncate">Produk Top #1</span>
       <span class="text-xs font-bold text-slate-900 truncate block" id="pillBestProduct">Memuat...</span>
     </div>
   </div>
 
   <!-- Varian Top #1 -->
-  <div class="card-ribbon-light p-3 flex items-center gap-2.5">
+  <div class="card-ribbon-light p-3 flex items-center gap-2.5 min-w-0">
     <div class="w-8 h-8 rounded-lg bg-cyan-50 text-cyan-600 flex items-center justify-center shrink-0 border border-cyan-200">
       <Layers class="w-4 h-4" />
     </div>
-    <div class="truncate">
-      <span class="text-[10px] text-slate-500 block uppercase tracking-wider font-semibold">Varian Top #1</span>
+    <div class="min-w-0 flex-1">
+      <span class="text-[10px] text-slate-500 block uppercase tracking-wider font-semibold truncate">Varian Top #1</span>
       <span class="text-xs font-bold text-cyan-700 truncate block" id="pillBestVariant">Memuat...</span>
     </div>
   </div>
