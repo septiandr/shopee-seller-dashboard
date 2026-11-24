@@ -1422,6 +1422,35 @@
     </div>
   </div>
 
-  <script src="/static/app.js"></script>
+  <!-- Resi Modal & Print Script (Inline fallback to prevent cache issues) -->
+  <script>
+    window.openResiModal = function() {
+      const modal = document.getElementById('resiModal');
+      if (modal) {
+        modal.classList.remove('hidden');
+        if (typeof loadResiStatus === 'function') loadResiStatus();
+        if (typeof loadResiFiles === 'function') loadResiFiles();
+      }
+    };
+
+    window.closeResiModal = function() {
+      const modal = document.getElementById('resiModal');
+      if (modal) {
+        modal.classList.add('hidden');
+      }
+    };
+
+    window.openPrintResi = function(filename, event = null) {
+      if (event) event.stopPropagation();
+      const checkEl = document.getElementById('checkIncludeCard');
+      const includeCard = checkEl ? (checkEl.checked ? '1' : '0') : '1';
+      const threshEl = document.getElementById('selectResiThreshold');
+      const thresholdVal = threshEl ? threshEl.value : '180';
+      const url = `/static/print-resi.html?file=${encodeURIComponent(filename)}&card=${includeCard}&threshold=${thresholdVal}`;
+      window.open(url, '_blank');
+    };
+  </script>
+
+  <script src="/static/app.js?v=20261124_02"></script>
 </body>
 </html>
