@@ -527,8 +527,11 @@
           <svg style="width:14px;height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
           Buka Resi Web (Port 8137)
         </a>
-        <button onclick="window.print()" class="btn-print btn-tactile" title="Cetak langsung ke printer 80mm (Tekan Enter)">
-          🖨️ Cetak / Print Sekarang (Enter)
+        <button id="btnPrintThermal" onclick="printThermalDirect()" class="btn-print btn-tactile" style="background:#4f46e5;" title="Kirim byte ESC/POS langsung ke printer thermal Bluetooth RPP02N (Tekan Enter)">
+          ⚡ Cetak Langsung ke Thermal RPP02N (Enter)
+        </button>
+        <button onclick="window.print()" class="btn-back btn-tactile" title="Buka dialog print bawaan browser">
+          Print via Browser
         </button>
       </div>
     </div>
@@ -735,7 +738,7 @@
             overlay.style.display = 'none';
             if (params.get('auto') === '1' && !window.__hasAutoPrinted) {
               window.__hasAutoPrinted = true;
-              setTimeout(() => window.print(), 350);
+              setTimeout(() => printThermalDirect(), 400);
             }
           }
         };
@@ -751,10 +754,47 @@
       });
     }
 
-    // Keyboard shortcut Enter to print immediately
+    // Direct Thermal Print Function (ESC/POS Bluetooth via Server)
+    async function printThermalDirect() {
+      const btn = document.getElementById('btnPrintThermal');
+      const originalText = btn ? btn.innerHTML : '';
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span>⏳ Mengirim ke RPP02N...</span>';
+      }
+      try {
+        const card = document.getElementById('checkCard').checked;
+        const threshold = Number(document.getElementById('selectThreshold').value);
+        const res = await fetch('/api/resi/print', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ filename, include_card: card, threshold: threshold })
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+          alert(`✅ Berhasil dicetak langsung ke Printer Thermal RPP02N!\n${data.message}`);
+        } else {
+          const msg = data.message || '';
+          if (msg.includes('Peripheral not found') || msg.includes('timeout') || msg.includes('connect')) {
+            alert('⚠️ Printer Thermal RPP02N tidak terdeteksi via Bluetooth.\n\nLangkah pengecekan:\n1. Pastikan tombol power printer RPP02N sudah MENYALA.\n2. Pastikan lampu indikator Bluetooth aktif.\n3. Tekan kembali tombol Cetak setelah printer menyala.');
+          } else {
+            alert(`⚠️ Gagal cetak: ${data.message}`);
+          }
+        }
+      } catch (err) {
+        alert(`Error koneksi ke printer thermal: ${err.message}`);
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = originalText;
+        }
+      }
+    }
+
+    // Keyboard shortcut Enter to print immediately to thermal printer
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
-        window.print();
+        printThermalDirect();
       }
     });
 

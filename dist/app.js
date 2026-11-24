@@ -244,7 +244,7 @@ async function loadOrders() {
         (rf.tracking_no && rf.tracking_no !== '-' && o.tracking_no && o.tracking_no.includes(rf.tracking_no))
       );
       const resiPrintBtn = matchedResi
-        ? `<button onclick="openPrintResi('${escapeHtml(matchedResi.filename)}', event, true)" class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-600 text-white hover:bg-indigo-700 shadow-xs mt-1 ml-1" title="Langsung cetak resi ${escapeHtml(matchedResi.filename)} ke Printer 80mm"><i data-lucide="printer" class="w-3 h-3"></i> Cetak Resi (Langsung)</button>`
+        ? `<button onclick="printResiBle('${escapeHtml(matchedResi.filename)}', event)" class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-600 text-white hover:bg-indigo-700 shadow-xs mt-1 ml-1" title="Langsung cetak resi ${escapeHtml(matchedResi.filename)} ke Printer Thermal RPP02N"><i data-lucide="printer" class="w-3 h-3"></i> Cetak Thermal</button>`
         : '';
 
       return `
@@ -2024,23 +2024,23 @@ async function loadResiFiles() {
             </td>
             <td class="py-2.5 px-3 text-right">
               <div class="flex items-center justify-end gap-1.5">
+                <button onclick="printResiBle('${escapeHtml(rf.filename)}')" 
+                        class="btn-tactile px-2.5 py-1 text-xs font-bold rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm flex items-center gap-1.5"
+                        title="Kirim langsung ke printer thermal Bluetooth RPP02N">
+                  <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+                  <span>Cetak Thermal</span>
+                </button>
                 <button onclick="openPrintResi('${escapeHtml(rf.filename)}')" 
-                        class="btn-tactile px-2.5 py-1 text-xs font-bold rounded bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm flex items-center gap-1"
-                        title="Buka pratinjau & cetak langsung ke printer 80mm">
-                  <i data-lucide="printer" class="w-3 h-3"></i>
-                  <span>Cetak 80mm</span>
+                        class="btn-tactile px-2 py-1 text-xs font-semibold rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 shadow-2xs flex items-center gap-1"
+                        title="Buka pratinjau halaman cetak resi roll 80mm">
+                  <i data-lucide="eye" class="w-3 h-3 text-slate-500"></i>
+                  <span class="hidden sm:inline">Preview</span>
                 </button>
                 <a href="/api/resi/pdf/${encodeURIComponent(rf.filename)}?include_card=1" target="_blank" 
-                   class="btn-tactile px-2 py-1 text-xs font-bold rounded border border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100 flex items-center gap-1"
+                   class="btn-tactile px-2 py-1 text-xs font-semibold rounded-lg border border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100 flex items-center gap-1"
                    title="Lihat Pratinjau PDF Resi + Kartu Bintang 5">
-                  <i data-lucide="eye" class="w-3 h-3 text-amber-600"></i>
                   <span class="hidden sm:inline">PDF</span>
                 </a>
-                <button onclick="printResiBle('${escapeHtml(rf.filename)}')" 
-                        class="btn-tactile px-1.5 py-1 text-xs rounded border border-slate-200 text-slate-500 hover:bg-slate-100 flex items-center gap-1"
-                        title="Kirim lewat Bluetooth BLE">
-                  <i data-lucide="bluetooth" class="w-3 h-3"></i>
-                </button>
               </div>
             </td>
           </tr>
@@ -2072,7 +2072,7 @@ function openPrintResi(filename, event = null, autoPrint = false) {
 
 async function directPrintLatestResi() {
   try {
-    showToast('Membuka resi terbaru untuk langsung dicetak...', 'info');
+    showToast('Memeriksa file resi terbaru untuk cetak thermal...', 'info');
     const res = await fetch('/api/resi/files');
     const data = await res.json();
     if (!data.files || data.files.length === 0) {
@@ -2081,7 +2081,7 @@ async function directPrintLatestResi() {
       return;
     }
     const latest = data.files[0];
-    openPrintResi(latest.filename, null, true);
+    await printResiBle(latest.filename);
   } catch (err) {
     showToast('Gagal memuat resi terbaru: ' + err.message, 'error');
   }
@@ -2092,10 +2092,10 @@ async function printResiBle(filename, event = null) {
   const checkEl = document.getElementById('checkIncludeCard');
   const includeCard = checkEl ? checkEl.checked : true;
   const thresholdVal = Number(document.getElementById('selectResiThreshold')?.value || 180);
-  const labelText = includeCard ? `${filename} (+ Kartu Bintang 5, Gelap ≥ ${thresholdVal})` : `${filename} (Gelap ≥ ${thresholdVal})`;
+  const labelText = includeCard ? `${filename} (+ Kartu Bintang 5)` : filename;
 
   try {
-    showToast(`Mengirim ${labelText} ke printer Bluetooth BLE (RPP02N)...`, 'info');
+    showToast(`🖨️ Mengirim ${labelText} langsung ke Thermal RPP02N...`, 'info');
     const res = await fetch('/api/resi/print', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -2103,12 +2103,17 @@ async function printResiBle(filename, event = null) {
     });
     const data = await res.json();
     if (data.status === 'success') {
-      showToast(`Berhasil! ${data.message}`, 'success');
+      showToast(`✅ Berhasil! ${data.message}`, 'success');
     } else {
-      showToast(`Gagal: ${data.message}`, 'error');
+      const msg = data.message || '';
+      if (msg.includes('Peripheral not found') || msg.includes('timeout') || msg.includes('connect')) {
+        showToast('⚠️ Printer thermal RPP02N tidak terhubung. Silakan pastikan tombol power printer MENYALA dan Bluetooth aktif!', 'error');
+      } else {
+        showToast(`Gagal: ${msg}`, 'error');
+      }
     }
   } catch (err) {
-    showToast(`Error cetak resi: ${err.message}`, 'error');
+    showToast(`Error koneksi ke printer thermal: ${err.message}`, 'error');
   }
 }
 

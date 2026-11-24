@@ -58,23 +58,40 @@ import Modals from '../components/Modals.astro';
       window.open(`/print-resi?file=${encodeURIComponent(filename)}&card=${card}&threshold=${threshold}`, '_blank');
     };
 
-    window.directPrintLatestResi = function() {
-      fetch('/api/resi/files')
-        .then(res => res.json())
-        .then(data => {
-          if (data && data.files && data.files.length > 0) {
-            const latest = data.files[0].filename;
-            const card = document.getElementById('checkIncludeCard')?.checked ? '1' : '0';
-            const threshold = document.getElementById('selectResiThreshold')?.value || '180';
-            window.open(`/print-resi?file=${encodeURIComponent(latest)}&card=${card}&threshold=${threshold}&auto=1`, '_blank');
+    window.directPrintLatestResi = async function() {
+      try {
+        if (typeof window.showToast === 'function') {
+          window.showToast('Memeriksa file resi terbaru...', 'info');
+        }
+        const res = await fetch('/api/resi/files');
+        const data = await res.json();
+        if (data && data.files && data.files.length > 0) {
+          const latest = data.files[0].filename;
+          if (typeof window.printResiBle === 'function') {
+            await window.printResiBle(latest);
           } else {
-            alert('Belum ada file resi PDF di folder resi/. Silakan download label dari Shopee Seller terlebih dahulu.');
+            // Direct fetch fallback to thermal printer
+            const includeCard = document.getElementById('checkIncludeCard')?.checked !== false;
+            const threshold = Number(document.getElementById('selectResiThreshold')?.value || 180);
+            const printRes = await fetch('/api/resi/print', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ filename: latest, include_card: includeCard, threshold: threshold })
+            });
+            const printData = await printRes.json();
+            if (printData.status === 'success') {
+              alert(`✅ Berhasil dicetak langsung ke Printer Thermal: ${latest}`);
+            } else {
+              alert(`⚠️ Gagal cetak ke thermal: ${printData.message}\n\nPastikan tombol power printer thermal RPP02N menyala dan Bluetooth aktif.`);
+            }
           }
-        })
-        .catch(err => {
-          console.error(err);
-          alert('Gagal mengambil daftar resi terbaru: ' + err.message);
-        });
+        } else {
+          alert('Belum ada file resi PDF di folder resi/. Silakan download label dari Shopee Seller terlebih dahulu.');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Gagal mengirim resi ke printer thermal: ' + err.message);
+      }
     };
   </script>
 
