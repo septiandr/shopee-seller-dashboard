@@ -1541,7 +1541,8 @@ def api_resi_print(data: dict):
     import subprocess
     try:
         cmd = [bun_bin, str(script_path), "import", str(target_pdf), "--threshold", threshold, "--yes"]
-        res = subprocess.run(cmd, cwd=str(RESI_PRINTER_DIR), capture_output=True, text=True, timeout=30)
+        # Berikan timeout 90 detik agar file PDF multi-halaman dapat terkirim via BLE tanpa terputus
+        res = subprocess.run(cmd, cwd=str(RESI_PRINTER_DIR), capture_output=True, text=True, timeout=90)
         output = (res.stdout or "") + (res.stderr or "")
         card_msg = " + Kartu Bintang 5" if include_card else ""
         if res.returncode == 0:
