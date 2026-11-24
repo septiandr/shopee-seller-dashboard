@@ -1,0 +1,127 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-page: #F8FAFC;
+    --card-bg: #FFFFFF;
+    --card-border: #E2E8F0;
+    --text-main: #0F172A;
+    --text-muted: #64748B;
+    --accent-amber: #F59E0B;
+    --emerald-profit: #059669;
+    --rose-deduct: #E11D48;
+
+    /* better-ui: Exact 3-layer transparent elevation shadows */
+    --shadow-border:
+      0px 0px 0px 1px rgba(15, 23, 42, 0.05),
+      0px 1px 2px -1px rgba(15, 23, 42, 0.06),
+      0px 2px 4px 0px rgba(15, 23, 42, 0.04);
+    --shadow-card:
+      0px 0px 0px 1px rgba(15, 23, 42, 0.06),
+      0px 1px 3px 0px rgba(15, 23, 42, 0.05),
+      0px 6px 16px -2px rgba(15, 23, 42, 0.03);
+    --shadow-card-hover:
+      0px 0px 0px 1px rgba(15, 23, 42, 0.09),
+      0px 2px 6px 0px rgba(15, 23, 42, 0.07),
+      0px 10px 24px -4px rgba(15, 23, 42, 0.06);
+    --shadow-modal:
+      0px 0px 0px 1px rgba(15, 23, 42, 0.08),
+      0 20px 25px -5px rgba(15, 23, 42, 0.12),
+      0 10px 10px -5px rgba(15, 23, 42, 0.04);
+  }
+
+  body {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: #F8FAFC;
+    color: #0F172A;
+    letter-spacing: -0.015em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+.font-mono-num {
+  font-family: 'Space Grotesk', monospace;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* Clean Light Surfaces (better-ui) */
+.card-clean {
+  background: #FFFFFF;
+  border: 1px solid transparent;
+  border-radius: 1rem;
+  box-shadow: var(--shadow-card);
+  transition: box-shadow 150ms ease-out, border-color 150ms ease-out;
+}
+@media (hover: hover) {
+  .card-clean:hover {
+    border-color: rgba(15, 23, 42, 0.1);
+    box-shadow: var(--shadow-card-hover);
+  }
+}
+
+.card-hero-light {
+  background: linear-gradient(180deg, #FFFFFF 0%, #FEF9C3 100%);
+  border: 1px solid #FCD34D;
+  border-radius: 1rem;
+  box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.2), 0 4px 14px -2px rgba(245, 158, 11, 0.18);
+}
+
+.card-ribbon-light {
+  background: #FFFFFF;
+  border: 1px solid transparent;
+  border-radius: 0.875rem;
+  box-shadow: var(--shadow-border);
+  transition: box-shadow 150ms ease-out, border-color 150ms ease-out;
+}
+@media (hover: hover) {
+  .card-ribbon-light:hover {
+    border-color: rgba(245, 158, 11, 0.4);
+    box-shadow: var(--shadow-card);
+  }
+}
+
+/* Tactile Buttons (better-ui exact scale 0.96 & 150ms ease-out) */
+.btn-tactile {
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  cursor: pointer;
+  transition: transform 150ms ease-out, background-color 150ms ease-out, border-color 150ms ease-out, box-shadow 150ms ease-out;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .btn-tactile:not(:disabled):active {
+    transform: scale(0.96);
+  }
+}
+
+/* Overscroll containment (better-ui) */
+.modal-contain {
+  overscroll-behavior: contain;
+}
+
+/* Custom Light Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #F1F5F9;
+}
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+/* Accessibility: Reduced Motion (better-ui) */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+    transform: none !important;
+  }
+}

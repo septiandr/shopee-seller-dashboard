@@ -54,6 +54,7 @@ async def add_no_cache_header(request: Request, call_next):
 
 BASE_DIR = Path(__file__).parent
 STATIC_DIR = BASE_DIR / "static"
+DIST_DIR = BASE_DIR / "dist"
 UPLOADS_DIR = BASE_DIR / "uploads"
 UPLOADS_DIR.mkdir(exist_ok=True)
 
@@ -1664,10 +1665,35 @@ async def api_resi_upload(file: UploadFile = File(...)):
 
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
+if (DIST_DIR / "_astro").exists():
+    app.mount("/_astro", StaticFiles(directory=str(DIST_DIR / "_astro")), name="astro")
+
 @app.api_route("/", methods=["GET", "HEAD"])
 def serve_index():
+    if (DIST_DIR / "index.html").exists():
+        return HTMLResponse(content=(DIST_DIR / "index.html").read_text(encoding="utf-8"))
     index_file = STATIC_DIR / "index.html"
     return HTMLResponse(content=index_file.read_text(encoding="utf-8"))
+
+@app.api_route("/print-resi", methods=["GET", "HEAD"])
+@app.api_route("/static/print-resi.html", methods=["GET", "HEAD"])
+def serve_print_resi():
+    if (DIST_DIR / "print-resi" / "index.html").exists():
+        return HTMLResponse(content=(DIST_DIR / "print-resi" / "index.html").read_text(encoding="utf-8"))
+    return HTMLResponse(content=(STATIC_DIR / "print-resi.html").read_text(encoding="utf-8"))
+
+@app.api_route("/thermal-card", methods=["GET", "HEAD"])
+@app.api_route("/static/thermal-card.html", methods=["GET", "HEAD"])
+def serve_thermal_card():
+    if (DIST_DIR / "thermal-card" / "index.html").exists():
+        return HTMLResponse(content=(DIST_DIR / "thermal-card" / "index.html").read_text(encoding="utf-8"))
+    return HTMLResponse(content=(STATIC_DIR / "thermal-card.html").read_text(encoding="utf-8"))
+
+@app.api_route("/app.js", methods=["GET", "HEAD"])
+def serve_app_js():
+    if (DIST_DIR / "app.js").exists():
+        return FileResponse(str(DIST_DIR / "app.js"))
+    return FileResponse(str(STATIC_DIR / "app.js"))
 
 if __name__ == "__main__":
     import uvicorn

@@ -10,7 +10,13 @@ echo ""
 
 PORT=$(python3 -c "import json; print(json.load(open('config.json')).get('port', 8000))" 2>/dev/null || echo 8000)
 
-# 1. Matikan proses lama di port $PORT jika ada
+export PATH="$HOME/.bun/bin:$PATH"
+
+# Build Astro frontend with Bun if available
+if command -v bun >/dev/null 2>&1; then
+  echo "⚡ Membangun frontend Astro dengan Bun..."
+  bun run build >/dev/null 2>&1
+fi
 OLD_PID=$(lsof -ti:$PORT)
 if [ ! -z "$OLD_PID" ]; then
   echo "Menghentikan server sebelumnya di port $PORT (PID: $OLD_PID)..."

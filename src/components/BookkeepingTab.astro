@@ -1,0 +1,295 @@
+---
+import { 
+  Calculator, 
+  ShoppingBag, 
+  Scissors, 
+  Package, 
+  TrendingUp, 
+  CreditCard, 
+  Sparkles, 
+  Boxes, 
+  PieChart, 
+  Plus, 
+  Receipt, 
+  Wallet, 
+  Search 
+} from 'lucide-astro';
+---
+
+<div id="tabContentBookkeeping" class="space-y-6 hidden">
+  
+  <!-- Top Action Bar for Bookkeeping -->
+  <div class="flex flex-wrap items-center justify-between gap-3 p-4 rounded-2xl bg-emerald-50 border border-emerald-200">
+    <div>
+      <h2 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+        <Calculator class="w-4 h-4 text-emerald-600" />
+        Pembukuan Keuangan & Biaya Tambahan (Laba Rugi Lengkap)
+      </h2>
+      <p class="text-xs text-slate-600">Catat biaya operasional (iklan, bubble wrap, lakban, gaji, transport) untuk melihat Laba Bersih Akhir Bisnis.</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <a href="https://seller.shopee.co.id/portal/finance/wallet/shopeepay" 
+         target="_blank" 
+         rel="noopener noreferrer" 
+         onclick="openShopeePage('finance', event)"
+         class="btn-tactile flex items-center gap-2 ps-3 pe-4 py-2 text-xs font-bold rounded-lg bg-white text-emerald-700 border border-emerald-300 hover:bg-emerald-100 shadow-sm"
+         title="Buka Halaman Pemasukan / Saldo ShopeePay di Brave (Profile: sdrisanggalih)">
+        <Wallet class="w-4 h-4 text-emerald-600" />
+        <span>Buka Shopee Pemasukan (Brave)</span>
+      </a>
+      <button onclick="openExpenseModal()" class="btn-tactile flex items-center gap-2 ps-3 pe-4 py-2 text-xs font-bold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm">
+        <Plus class="w-4 h-4 stroke-[2.5]" />
+        <span>Catat Biaya Baru</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 6 KPI Summary Cards: P&L Statement (Waterfall Laba Rugi) -->
+  <section class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
+    
+    <!-- 1. Omzet Penjualan -->
+    <div class="card-clean p-4 flex flex-col justify-between">
+      <span class="text-xs font-bold uppercase tracking-wider text-[11px] text-slate-500 flex items-center justify-between">
+        <span>1. Omzet Penjualan</span>
+        <ShoppingBag class="w-4 h-4 text-slate-400" />
+      </span>
+      <div class="mt-2">
+        <div class="text-lg sm:text-xl font-bold font-mono-num text-slate-900" id="pnlOmzet">Rp 0</div>
+        <p class="text-[10px] text-slate-500 mt-0.5" id="pnlOrdersCount">0 Transaksi</p>
+      </div>
+    </div>
+
+    <!-- 2. Potongan Shopee -->
+    <div class="card-clean p-4 flex flex-col justify-between border-rose-200 bg-rose-50/40">
+      <span class="text-xs font-bold uppercase tracking-wider text-[11px] text-rose-700 flex items-center justify-between">
+        <span>2. Potongan Shopee</span>
+        <Scissors class="w-4 h-4 text-rose-500" />
+      </span>
+      <div class="mt-2">
+        <div class="text-lg sm:text-xl font-bold font-mono-num text-rose-600" id="pnlDeductions">-Rp 0</div>
+        <p class="text-[10px] text-slate-500 mt-0.5">Admin + Ongkir + Pajak</p>
+      </div>
+    </div>
+
+    <!-- 3. Modal Pokok HPP -->
+    <div class="card-clean p-4 flex flex-col justify-between">
+      <span class="text-xs font-bold uppercase tracking-wider text-[11px] text-slate-500 flex items-center justify-between">
+        <span>3. Modal HPP Produk</span>
+        <Package class="w-4 h-4 text-amber-500" />
+      </span>
+      <div class="mt-2">
+        <div class="text-lg sm:text-xl font-bold font-mono-num text-slate-800" id="pnlHpp">-Rp 0</div>
+        <p class="text-[10px] text-slate-500 mt-0.5">Cover Rp 6k + Baut Rp 2k</p>
+      </div>
+    </div>
+
+    <!-- 4. Laba Kotor Produk -->
+    <div class="card-clean p-4 flex flex-col justify-between border-blue-200 bg-blue-50/30">
+      <span class="text-xs font-bold uppercase tracking-wider text-[11px] text-blue-700 flex items-center justify-between">
+        <span>4. Laba Kotor Produk</span>
+        <TrendingUp class="w-4 h-4 text-blue-500" />
+      </span>
+      <div class="mt-2">
+        <div class="text-lg sm:text-xl font-bold font-mono-num text-blue-700" id="pnlGrossProfit">Rp 0</div>
+        <p class="text-[10px] text-slate-500 mt-0.5 font-mono-num" id="pnlGrossMargin">Margin: 0%</p>
+      </div>
+    </div>
+
+    <!-- 5. Biaya Tambahan Operasional -->
+    <div class="card-clean p-4 flex flex-col justify-between border-amber-200 bg-amber-50/40">
+      <span class="text-xs font-bold uppercase tracking-wider text-[11px] text-amber-800 flex items-center justify-between">
+        <span>5. Biaya Tambahan</span>
+        <CreditCard class="w-4 h-4 text-amber-600" />
+      </span>
+      <div class="mt-2">
+        <div class="text-lg sm:text-xl font-bold font-mono-num text-amber-700" id="pnlTotalExpenses">-Rp 0</div>
+        <p class="text-[10px] text-slate-500 mt-0.5" id="pnlExpenseCount">0 Biaya Tercatat</p>
+      </div>
+    </div>
+
+    <!-- 6. HERO: LABA BERSIH AKHIR BISNIS -->
+    <div class="card-hero-light p-4 flex flex-col justify-between relative overflow-hidden">
+      <span class="text-xs font-extrabold uppercase tracking-wider text-amber-900 flex items-center justify-between">
+        <span>6. Laba Bersih Akhir</span>
+        <Sparkles class="w-4 h-4 text-amber-600" />
+      </span>
+      <div class="mt-2">
+        <div class="text-xl sm:text-2xl font-black font-mono-num text-emerald-700" id="pnlNetBusinessProfit">Rp 0</div>
+        <div class="flex items-center gap-1.5 text-[11px] mt-1 font-semibold">
+          <span class="px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800 font-bold font-mono-num" id="pnlNetBusinessMargin">0%</span>
+          <span class="text-slate-600">Laba Bersih Akhir</span>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- Rekap Item-Item yang Terjual & Laba Bersih -->
+  <section class="card-clean overflow-hidden shadow-sm">
+    <div class="px-5 py-4 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 bg-slate-50/70">
+      <div>
+        <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+          <Boxes class="w-4 h-4 text-emerald-600" />
+          Item & Produk Terjual (Rincian Laba Bersih)
+        </h3>
+        <p class="text-xs text-slate-500">Perhitungan laba bersih riil per item setelah potongan Shopee & modal HPP Cover + Baut.</p>
+      </div>
+      
+      <div class="flex items-center gap-2">
+        <!-- View Mode Switcher -->
+        <div class="flex items-center bg-slate-200/70 p-0.5 rounded-lg text-[11px] font-semibold">
+          <button onclick="switchBookkeepingItemView('summary')" id="btnViewItemSummary" class="px-2.5 py-1 rounded-md bg-white text-slate-900 shadow-sm transition-all">
+            Rekap per Item
+          </button>
+          <button onclick="switchBookkeepingItemView('transactions')" id="btnViewItemTransactions" class="px-2.5 py-1 rounded-md text-slate-600 hover:text-slate-900 transition-all">
+            Rincian per Pesanan
+          </button>
+        </div>
+
+        <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-mono-num" id="pnlSoldItemsTotalProfit">
+          Total Laba: Rp 0
+        </span>
+      </div>
+    </div>
+
+    <!-- 1. Table Summary per Item & Varian -->
+    <div id="viewBookkeepingItemSummary" class="overflow-x-auto">
+      <table class="w-full text-left border-collapse text-xs">
+        <thead>
+          <tr class="border-b border-slate-200 bg-slate-100/90 text-slate-700 font-bold uppercase tracking-wider text-[11px]">
+            <th class="py-3 px-4">Nama Produk & Varian Terjual</th>
+            <th class="py-3 px-3 text-center">Model</th>
+            <th class="py-3 px-3 text-center">Baut</th>
+            <th class="py-3 px-3 text-center">Terjual</th>
+            <th class="py-3 px-4 text-right">Omzet Kotor</th>
+            <th class="py-3 px-4 text-right">Potongan Shopee</th>
+            <th class="py-3 px-4 text-right">Modal HPP</th>
+            <th class="py-3 px-4 text-right bg-emerald-50 text-emerald-900 font-extrabold">Laba Bersih</th>
+            <th class="py-3 px-3 text-center">Margin</th>
+          </tr>
+        </thead>
+        <tbody id="pnlSoldItemsTableBody" class="divide-y divide-slate-200 text-slate-800 bg-white">
+          <tr>
+            <td colspan="9" class="py-8 text-center text-slate-400">Memuat data item terjual...</td>
+          </tr>
+        </tbody>
+        <tfoot id="pnlSoldItemsTableFoot" class="bg-slate-50 border-t-2 border-slate-300 font-bold text-slate-900"></tfoot>
+      </table>
+    </div>
+
+    <!-- 2. Table Detail per Pesanan (Transactions) -->
+    <div id="viewBookkeepingItemTransactions" class="overflow-x-auto hidden">
+      <table class="w-full text-left border-collapse text-xs">
+        <thead>
+          <tr class="border-b border-slate-200 bg-slate-100/90 text-slate-700 font-bold uppercase tracking-wider text-[11px]">
+            <th class="py-3 px-4">Tanggal & No. Pesanan</th>
+            <th class="py-3 px-4">Produk & Varian Terjual</th>
+            <th class="py-3 px-3 text-center">Tujuan</th>
+            <th class="py-3 px-2 text-center">Qty</th>
+            <th class="py-3 px-4 text-right">Omzet</th>
+            <th class="py-3 px-4 text-right">Potongan Shopee</th>
+            <th class="py-3 px-4 text-right">HPP</th>
+            <th class="py-3 px-4 text-right bg-emerald-50 text-emerald-900 font-extrabold">Laba Bersih</th>
+            <th class="py-3 px-3 text-center">Margin</th>
+          </tr>
+        </thead>
+        <tbody id="pnlSoldTransactionsTableBody" class="divide-y divide-slate-200 text-slate-800 bg-white">
+          <tr>
+            <td colspan="9" class="py-8 text-center text-slate-400">Memuat rincian pesanan...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Category Breakdown Cards -->
+  <section class="card-clean p-5 space-y-3">
+    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+      <div>
+        <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+          <PieChart class="w-4 h-4 text-amber-500" />
+          Distribusi Biaya Tambahan per Kategori
+        </h3>
+        <p class="text-xs text-slate-500">Rincian alokasi pengeluaran operasional toko</p>
+      </div>
+      <span class="text-xs font-bold text-slate-700 font-mono-num" id="pnlCategoryTotalHeader">Total: Rp 0</span>
+    </div>
+
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 pt-1" id="expenseCategoryGrid">
+      <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-center text-xs text-slate-400">
+        Belum ada biaya tercatat
+      </div>
+    </div>
+  </section>
+
+  <!-- Filter & Search Toolbar for Expenses -->
+  <section class="card-clean p-4 space-y-3">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      
+      <div class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs">
+        <button onclick="setExpensePeriod('all')" class="exp-period-btn px-3 py-1.5 rounded-lg font-bold text-slate-900 bg-white shadow-sm" data-period="all">Semua</button>
+        <button onclick="setExpensePeriod('today')" class="exp-period-btn px-3 py-1.5 rounded-lg font-medium text-slate-600 hover:text-slate-900" data-period="today">Hari Ini</button>
+        <button onclick="setExpensePeriod('yesterday')" class="exp-period-btn px-3 py-1.5 rounded-lg font-medium text-slate-600 hover:text-slate-900" data-period="yesterday">Kemarin</button>
+        <button onclick="setExpensePeriod('7days')" class="exp-period-btn px-3 py-1.5 rounded-lg font-medium text-slate-600 hover:text-slate-900" data-period="7days">7 Hari</button>
+        <button onclick="setExpensePeriod('30days')" class="exp-period-btn px-3 py-1.5 rounded-lg font-medium text-slate-600 hover:text-slate-900" data-period="30days">30 Hari</button>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2">
+        <select id="filterExpenseCategory" onchange="loadExpensesData()" class="text-xs bg-white border border-slate-200 text-slate-700 rounded-lg px-3 py-2 outline-none focus:border-amber-500 shadow-sm">
+          <option value="all">Semua Kategori Biaya</option>
+          <option value="Iklan / Ads">Iklan / Ads</option>
+          <option value="Bahan Packing">Bahan Packing (Bubble / Lakban)</option>
+          <option value="Operasional & Toko">Operasional & Toko</option>
+          <option value="Logistik & Transport">Logistik & Transport</option>
+          <option value="Gaji & Upah">Gaji & Upah</option>
+          <option value="Retur & Ganti Rugi">Retur & Ganti Rugi</option>
+          <option value="Lain-lain">Lain-lain</option>
+        </select>
+      </div>
+
+      <div class="relative w-full sm:w-64">
+        <Search class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+        <input type="text" id="searchExpenseInput" oninput="debounceSearchExpense()" placeholder="Cari nama biaya / catatan..." class="w-full text-xs bg-white border border-slate-200 text-slate-900 pl-9 pr-3 py-2 rounded-lg outline-none focus:border-amber-500 placeholder:text-slate-400 shadow-sm">
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Table: Daftar Biaya Pengeluaran -->
+  <section class="card-clean overflow-hidden shadow-sm">
+    <div class="px-5 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50/50">
+      <div>
+        <h2 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+          <Receipt class="w-4 h-4 text-amber-500" />
+          Daftar Catatan Biaya Tambahan & Operasional
+        </h2>
+        <p class="text-xs text-slate-500" id="expenseRecordCount">Menampilkan 0 biaya</p>
+      </div>
+      <button onclick="openExpenseModal()" class="btn-tactile flex items-center gap-1.5 ps-2.5 pe-3.5 py-1.5 text-xs font-bold rounded-lg bg-amber-500 text-white hover:bg-amber-600 shadow-sm shadow-amber-500/20">
+        <Plus class="w-3.5 h-3.5" />
+        <span>Tambah</span>
+      </button>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse text-xs">
+        <thead>
+          <tr class="border-b border-slate-200 bg-slate-100 text-slate-700 font-bold uppercase tracking-wider text-[11px]">
+            <th class="py-3.5 px-4">Tanggal Biaya</th>
+            <th class="py-3.5 px-4">Kategori Biaya</th>
+            <th class="py-3.5 px-4">Deskripsi / Nama Biaya</th>
+            <th class="py-3.5 px-4">Catatan Tambahan</th>
+            <th class="py-3.5 px-4 text-right">Nominal (Rp)</th>
+            <th class="py-3.5 px-3 text-center">Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="expenseTableBody" class="divide-y divide-slate-200 text-slate-800 bg-white">
+          <tr>
+            <td colspan="6" class="py-8 text-center text-slate-400">Memuat catatan biaya...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</div>

@@ -1,0 +1,694 @@
+---
+import '../styles/global.css';
+import { Tag, ArrowLeft, Printer } from 'lucide-astro';
+---
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cetak Stiker Mini Thermal Ucapan Terima Kasih - Toko Zera</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+  
+  <style>
+    /* Reset & Base */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f1f5f9;
+      color: #0f172a;
+      padding: 20px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Controls Panel */
+    .controls-panel {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 18px;
+      padding: 18px 22px;
+      max-width: 860px;
+      width: 100%;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+    }
+
+    .controls-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 14px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .controls-header h1 {
+      font-size: 17px;
+      font-weight: 800;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .controls-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #64748b;
+      margin-bottom: 5px;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 8px 10px;
+      font-size: 12px;
+      font-weight: 600;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      background: #ffffff;
+      color: #0f172a;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .form-control:focus {
+      border-color: #0f172a;
+    }
+
+    .scale-control-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 6px 10px;
+    }
+
+    .scale-control-group input[type="range"] {
+      flex: 1;
+      cursor: pointer;
+    }
+
+    .scale-badge {
+      font-size: 11px;
+      font-weight: 800;
+      font-family: monospace;
+      color: #0f172a;
+      min-width: 38px;
+      text-align: right;
+    }
+
+    .btn-action-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: flex-end;
+      align-items: center;
+    }
+
+    .btn-primary {
+      background: #0f172a;
+      color: #ffffff;
+      padding: 10px 18px;
+      font-size: 13px;
+      font-weight: 800;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.2);
+      transition: all 0.15s;
+    }
+
+    .btn-primary:hover {
+      background: #334155;
+    }
+
+    .btn-secondary {
+      background: #ffffff;
+      color: #334155;
+      border: 1px solid #cbd5e1;
+      padding: 9px 14px;
+      font-size: 12px;
+      font-weight: 700;
+      border-radius: 8px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-secondary:hover {
+      background: #f8fafc;
+      border-color: #94a3b8;
+    }
+
+    .preset-pill-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px dashed #e2e8f0;
+      align-items: center;
+    }
+
+    .preset-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #64748b;
+      margin-right: 4px;
+    }
+
+    .preset-btn {
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #334155;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .preset-btn:hover, .preset-btn.active {
+      background: #0f172a;
+      color: #ffffff;
+      border-color: #0f172a;
+    }
+
+    .tip-box {
+      margin-top: 12px;
+      padding: 8px 12px;
+      background: #f8fafc;
+      border: 1px dashed #cbd5e1;
+      border-radius: 8px;
+      font-size: 11px;
+      color: #475569;
+      line-height: 1.45;
+    }
+
+    /* Print Stage Area */
+    .print-stage {
+      background: #cbd5e1;
+      padding: 24px;
+      border-radius: 16px;
+      box-shadow: inset 0 2px 6px rgba(0,0,0,0.06);
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      max-width: 860px;
+      overflow-x: auto;
+    }
+
+    /* Printable Root Sheet */
+    #printArea {
+      background: #ffffff;
+      color: #000000;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      border-radius: 2px;
+      margin: 0 auto;
+      transform-origin: top center;
+    }
+
+    /* LAYOUT 1: 8-IN-1 SUPER MINI */
+    .mode-8in1 {
+      width: 100mm;
+      min-height: 150mm;
+      padding: 2mm;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: repeat(4, 1fr);
+      gap: 1.5mm;
+    }
+
+    .mode-8in1 .card-item {
+      border: 1.2px dashed #000000;
+      border-radius: 4px;
+      padding: 1.8mm 2mm;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      text-align: center;
+      background: #ffffff;
+      height: 35mm;
+      overflow: hidden;
+    }
+
+    .mode-8in1 .badge-top { font-size: 6.5pt; padding: 0.5px 3px; margin-bottom: 1px; border-bottom: 1.2px solid #000; }
+    .mode-8in1 .title-thanks { font-size: 7.5pt; margin-bottom: 0px; font-weight: 900; }
+    .mode-8in1 .subtitle-text { font-size: 5pt; line-height: 1.15; margin-bottom: 1px; }
+    .mode-8in1 .stars-block { padding: 1.5px 2px; margin: 1px 0; border: 1px solid #000; border-radius: 3px; }
+    .mode-8in1 .stars-icon { font-size: 9pt; letter-spacing: 1px; line-height: 1; margin-bottom: 0px; }
+    .mode-8in1 .stars-cta { font-size: 4.8pt; font-weight: 800; line-height: 1.1; }
+    .mode-8in1 .box-garansi { padding: 1.5px 2px; margin: 1px 0; border: 1px solid #000; border-radius: 3px; }
+    .mode-8in1 .box-garansi-title { font-size: 4.8pt; margin-bottom: 0.5px; font-weight: 900; }
+    .mode-8in1 .box-garansi-desc { font-size: 4.2pt; line-height: 1.15; }
+    .mode-8in1 .footer-shop { font-size: 4.5pt; padding-top: 1px; margin-top: 1px; }
+
+    /* LAYOUT 2: 6-IN-1 MINI KOTAK */
+    .mode-6in1 {
+      width: 100mm;
+      min-height: 150mm;
+      padding: 2.2mm;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: repeat(3, 1fr);
+      gap: 2mm;
+    }
+
+    .mode-6in1 .card-item {
+      border: 1.4px dashed #000000;
+      border-radius: 5px;
+      padding: 2.5mm 2.5mm;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      text-align: center;
+      background: #ffffff;
+      height: 47mm;
+      overflow: hidden;
+    }
+
+    .mode-6in1 .badge-top { font-size: 7.5pt; padding: 1px 3px; margin-bottom: 1.5px; border-bottom: 1.5px solid #000; }
+    .mode-6in1 .title-thanks { font-size: 8.5pt; margin-bottom: 1px; font-weight: 900; }
+    .mode-6in1 .subtitle-text { font-size: 5.6pt; line-height: 1.2; margin-bottom: 2px; }
+    .mode-6in1 .stars-block { padding: 2px 3px; margin: 1.5px 0; border: 1.2px solid #000; border-radius: 3px; }
+    .mode-6in1 .stars-icon { font-size: 10.5pt; letter-spacing: 1.5px; line-height: 1; }
+    .mode-6in1 .stars-cta { font-size: 5.4pt; font-weight: 800; }
+    .mode-6in1 .box-garansi { padding: 2px 2.5px; margin: 1.5px 0; border: 1px solid #000; border-radius: 3px; }
+    .mode-6in1 .box-garansi-title { font-size: 5.4pt; margin-bottom: 0.5px; font-weight: 900; }
+    .mode-6in1 .box-garansi-desc { font-size: 4.8pt; line-height: 1.2; }
+    .mode-6in1 .footer-shop { font-size: 5.2pt; padding-top: 1px; margin-top: 1px; }
+
+    /* LAYOUT 3: 4-IN-1 STANDAR */
+    .mode-4in1 {
+      width: 100mm;
+      min-height: 150mm;
+      padding: 2.5mm;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 2mm;
+    }
+
+    .mode-4in1 .card-item {
+      border: 1.8px dashed #000000;
+      border-radius: 6px;
+      padding: 3mm 2.5mm;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      text-align: center;
+      background: #ffffff;
+      height: 71mm;
+      overflow: hidden;
+    }
+
+    .mode-4in1 .badge-top { font-size: 8.5pt; margin-bottom: 2px; border-bottom: 2px solid #000; }
+    .mode-4in1 .title-thanks { font-size: 9.5pt; margin-bottom: 2px; }
+    .mode-4in1 .subtitle-text { font-size: 6.5pt; margin-bottom: 4px; }
+    .mode-4in1 .stars-block { padding: 3px 4px; margin: 3px 0; }
+    .mode-4in1 .stars-icon { font-size: 13pt; letter-spacing: 2px; }
+    .mode-4in1 .stars-cta { font-size: 6.5pt; }
+    .mode-4in1 .box-garansi { padding: 3px 4px; margin: 3px 0; }
+    .mode-4in1 .box-garansi-title { font-size: 6.5pt; }
+    .mode-4in1 .box-garansi-desc { font-size: 5.5pt; }
+    .mode-4in1 .footer-shop { font-size: 6pt; }
+
+    /* LAYOUT 4: MINI COMPACT STIKER TUNGGAL (50 x 30 mm) */
+    .mode-mini5030 {
+      width: 50mm;
+      height: 30mm;
+      padding: 1.5mm;
+      display: flex;
+    }
+
+    .mode-mini5030 .card-item {
+      border: 1.2px solid #000000;
+      border-radius: 4px;
+      padding: 1.2mm 1.5mm;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      text-align: center;
+      background: #ffffff;
+      overflow: hidden;
+    }
+
+    .mode-mini5030 .badge-top { font-size: 5.5pt; padding: 0.2px 2px; margin-bottom: 0.5px; border-bottom: 1px solid #000; }
+    .mode-mini5030 .title-thanks { font-size: 6.5pt; line-height: 1.1; margin-bottom: 0px; }
+    .mode-mini5030 .subtitle-text { display: none; }
+    .mode-mini5030 .stars-block { padding: 1px 2px; margin: 0.8px 0; border-radius: 2px; }
+    .mode-mini5030 .stars-icon { font-size: 8pt; letter-spacing: 0.5px; margin-bottom: 0px; }
+    .mode-mini5030 .stars-cta { font-size: 4.2pt; font-weight: 800; }
+    .mode-mini5030 .box-garansi { padding: 1px 1.5px; margin: 0.8px 0; border: 0.8px solid #000; }
+    .mode-mini5030 .box-garansi-title { font-size: 4.4pt; margin-bottom: 0px; }
+    .mode-mini5030 .box-garansi-desc { font-size: 3.8pt; line-height: 1.1; }
+    .mode-mini5030 .footer-shop { font-size: 4.2pt; padding-top: 0.5px; margin-top: 0.5px; }
+
+    /* LAYOUT 5: STIKER TUNGGAL 75 x 50 mm */
+    .mode-single {
+      width: 75mm;
+      height: 50mm;
+      padding: 2mm;
+      display: flex;
+    }
+
+    .mode-single .card-item {
+      border: 1.8px solid #000000;
+      border-radius: 6px;
+      padding: 2.2mm 2.5mm;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      text-align: center;
+      background: #ffffff;
+    }
+
+    .mode-single .badge-top { font-size: 7.5pt; margin-bottom: 1px; }
+    .mode-single .title-thanks { font-size: 8.5pt; }
+    .mode-single .subtitle-text { font-size: 5.8pt; margin-bottom: 2px; }
+    .mode-single .stars-icon { font-size: 11pt; }
+    .mode-single .stars-cta { font-size: 5.5pt; }
+    .mode-single .box-garansi-title { font-size: 5.5pt; }
+    .mode-single .box-garansi-desc { font-size: 4.8pt; }
+    .mode-single .footer-shop { font-size: 5.5pt; }
+
+    /* COMMON INNER ELEMENTS */
+    .badge-top {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      display: inline-block;
+      margin: 0 auto;
+      line-height: 1.2;
+    }
+
+    .title-thanks {
+      font-weight: 900;
+      line-height: 1.15;
+      text-transform: uppercase;
+    }
+
+    .subtitle-text {
+      font-weight: 600;
+      line-height: 1.2;
+    }
+
+    .stars-block {
+      background: #000000;
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .stars-icon {
+      line-height: 1;
+    }
+
+    .stars-cta {
+      text-transform: uppercase;
+      letter-spacing: 0.2px;
+    }
+
+    .box-garansi {
+      text-align: left;
+      background: #ffffff;
+    }
+
+    .box-garansi-title {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      text-transform: uppercase;
+    }
+
+    .footer-shop {
+      font-weight: 800;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      border-top: 1px solid #000000;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Print settings */
+    @media print {
+      @page {
+        margin: 0;
+        size: auto;
+      }
+
+      body {
+        background: #ffffff !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+
+      .controls-panel, .cut-line-indicator {
+        display: none !important;
+      }
+
+      .print-stage {
+        background: transparent !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        box-shadow: none !important;
+      }
+
+      #printArea {
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        margin: 0 !important;
+        page-break-after: always;
+      }
+
+      .mode-8in1 {
+        width: 100mm !important;
+        height: 150mm !important;
+        padding: 1.5mm !important;
+      }
+
+      .mode-6in1 {
+        width: 100mm !important;
+        height: 150mm !important;
+        padding: 2mm !important;
+      }
+
+      .mode-4in1 {
+        width: 100mm !important;
+        height: 150mm !important;
+        padding: 2mm !important;
+      }
+
+      .mode-mini5030 {
+        width: 50mm !important;
+        height: 30mm !important;
+        padding: 1mm !important;
+      }
+
+      .mode-single {
+        width: 75mm !important;
+        height: 50mm !important;
+        padding: 1.5mm !important;
+      }
+
+      .card-item {
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Controls Panel -->
+  <div class="controls-panel">
+    <div class="controls-header">
+      <div>
+        <h1>🖨️ Cetak Stiker Mini Thermal - Kartu Terima Kasih</h1>
+        <p style="font-size: 12px; color: #64748b; margin-top: 2px;">
+          Format monokrom hitam-putih tajam. Desain lebih kecil, praktis & hemat kertas thermal!
+        </p>
+      </div>
+      <div class="btn-action-group">
+        <a href="/" class="btn-secondary btn-tactile">
+          <ArrowLeft class="w-3.5 h-3.5" />
+          <span>Kembali ke Dashboard</span>
+        </a>
+        <button onclick="window.print()" class="btn-primary btn-tactile">
+          <Printer class="w-4 h-4 stroke-[2.5]" />
+          <span>Cetak / Print Sekarang</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Configuration Options -->
+    <div class="controls-grid">
+      <div class="form-group">
+        <label for="selectLayout">Format Ukuran Stiker</label>
+        <select id="selectLayout" class="form-control" onchange="changeLayout(this.value)">
+          <option value="mode-8in1" selected>⭐ 8 Stiker per Lembar Resi (100×150 mm) - SUPER MINI & HEMAT!</option>
+          <option value="mode-6in1">⭐ 6 Stiker per Lembar Resi (100×150 mm) - MINI KOTAK</option>
+          <option value="mode-4in1">4 Stiker per Lembar Resi (100×150 mm) - SEDANG</option>
+          <option value="mode-mini5030">Stiker Tunggal Mini (50 × 30 mm)</option>
+          <option value="mode-single">Stiker Tunggal (75 × 50 mm)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="scaleRange">Skala Ukuran (Zoom)</label>
+        <div class="scale-control-group">
+          <input type="range" id="scaleRange" min="60" max="115" value="100" step="5" oninput="changeScale(this.value)">
+          <span class="scale-badge" id="scaleBadge">100%</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="inputShopName">Nama Toko</label>
+        <input type="text" id="inputShopName" class="form-control" value="TOKO ZERA" oninput="updateShopName(this.value)">
+      </div>
+
+      <div class="form-group">
+        <label for="inputUsername">Username / Link Toko</label>
+        <input type="text" id="inputUsername" class="form-control" value="shopee.co.id/septiandr" oninput="updateUsername(this.value)">
+      </div>
+    </div>
+
+    <!-- Quick Size Presets -->
+    <div class="preset-pill-group">
+      <span class="preset-label">Pilihan Cepat Ukuran:</span>
+      <button class="preset-btn active btn-tactile" onclick="applyPreset('mode-8in1', 100)">8-in-1 Super Mini (~47×35mm)</button>
+      <button class="preset-btn btn-tactile" onclick="applyPreset('mode-6in1', 100)">6-in-1 Mini Kotak (~47×47mm)</button>
+      <button class="preset-btn btn-tactile" onclick="applyPreset('mode-4in1', 100)">4-in-1 Sedang (~47×71mm)</button>
+      <button class="preset-btn btn-tactile" onclick="applyPreset('mode-mini5030', 100)">Mini 50×30 mm</button>
+      <button class="preset-btn btn-tactile" onclick="applyPreset('mode-8in1', 85)">Ekstra Kecil (85%)</button>
+    </div>
+
+    <div class="tip-box">
+      💡 <strong>Tips Seller:</strong> Pilihan <strong>8-in-1 Super Mini</strong> menghasilkan 8 stiker mini dari 1 lembar kertas resi thermal 100×150 mm. Sangat pas ditempel di sudut kemasan bubble wrap cover knalpot tanpa memakan banyak tempat!
+    </div>
+  </div>
+
+  <div style="font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 8px;">
+    👁️ Preview Cetak Thermal (Ukuran Kompak & Garis Potong):
+  </div>
+
+  <!-- Print Stage Area -->
+  <div class="print-stage">
+    <div id="printArea" class="mode-8in1">
+      
+      <!-- Generated Cards (8 cards) -->
+      {[1, 2, 3, 4, 5, 6, 7, 8].map(() => (
+        <div class="card-item">
+          <div>
+            <div class="badge-top shopNameEl">TOKO ZERA</div>
+            <div class="title-thanks">TERIMA KASIH! 🙏</div>
+            <p class="subtitle-text subtitleEl">Paket dipacking teliti. Semoga motor makin ganteng & awet!</p>
+          </div>
+          <div class="stars-block">
+            <div class="stars-icon">★★★★★</div>
+            <div class="stars-cta">BINTANG 5 & FOTO SANGAT BERARTI!</div>
+          </div>
+          <div class="box-garansi">
+            <div class="box-garansi-title">⚠️ KENDALA / KURANG?</div>
+            <div class="box-garansi-desc">
+              <strong>JANGAN RATING BURUK!</strong> Chat kami di Shopee, kami siap ganti baru 100%!
+            </div>
+          </div>
+          <div class="footer-shop">
+            <span class="usernameEl">shopee.co.id/septiandr</span>
+            <span>100% AMANAH</span>
+          </div>
+        </div>
+      ))}
+
+    </div>
+  </div>
+
+  <script is:inline>
+    function changeLayout(className) {
+      const area = document.getElementById('printArea');
+      area.className = className;
+      
+      const cards = area.querySelectorAll('.card-item');
+      if (className === 'mode-mini5030' || className === 'mode-single') {
+        cards.forEach((c, idx) => c.style.display = idx === 0 ? 'flex' : 'none');
+      } else if (className === 'mode-4in1') {
+        cards.forEach((c, idx) => c.style.display = idx < 4 ? 'flex' : 'none');
+      } else if (className === 'mode-6in1') {
+        cards.forEach((c, idx) => c.style.display = idx < 6 ? 'flex' : 'none');
+      } else {
+        cards.forEach(c => c.style.display = 'flex'); // 8 cards
+      }
+      document.getElementById('selectLayout').value = className;
+    }
+
+    function changeScale(val) {
+      document.getElementById('scaleBadge').textContent = val + '%';
+      const area = document.getElementById('printArea');
+      area.style.transform = `scale(${val / 100})`;
+    }
+
+    function applyPreset(layout, scale) {
+      changeLayout(layout);
+      document.getElementById('scaleRange').value = scale;
+      changeScale(scale);
+      
+      document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.remove('active'));
+      if (window.event && window.event.target) {
+        window.event.target.classList.add('active');
+      }
+    }
+
+    function updateShopName(val) {
+      document.querySelectorAll('.shopNameEl').forEach(el => el.textContent = val.toUpperCase() || 'TOKO ZERA');
+    }
+
+    function updateUsername(val) {
+      document.querySelectorAll('.usernameEl').forEach(el => el.textContent = val || 'shopee.co.id/septiandr');
+    }
+
+    // Default init to 8in1
+    changeLayout('mode-8in1');
+  </script>
+</body>
+</html>

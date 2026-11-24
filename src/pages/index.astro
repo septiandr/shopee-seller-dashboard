@@ -1,0 +1,83 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import TabNav from '../components/TabNav.astro';
+import OrdersTab from '../components/OrdersTab.astro';
+import BookkeepingTab from '../components/BookkeepingTab.astro';
+import AdsTab from '../components/AdsTab.astro';
+import Modals from '../components/Modals.astro';
+---
+
+<Layout title="Shopee Ledger & Ads - Pembukuan Cover Knalpot & Studio Resi 80mm">
+  <!-- Header Bar -->
+  <Header />
+
+  <!-- Navigation Tabs -->
+  <TabNav />
+
+  <!-- Main Content Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+    <!-- Toast Notifications Container -->
+    <div id="toastContainer" class="fixed top-20 right-6 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Tab 1: Orders & Sales -->
+    <OrdersTab />
+
+    <!-- Tab 2: Bookkeeping & P&L -->
+    <BookkeepingTab />
+
+    <!-- Tab 3: Ads & ROAS -->
+    <AdsTab />
+  </main>
+
+  <!-- Modals -->
+  <Modals />
+
+  <!-- Inline Bridge & Fallback Script to ensure zero reference errors -->
+  <script is:inline>
+    // Inlined modal bridge to prevent race condition or cache issues
+    window.openResiModal = function() {
+      const modal = document.getElementById('resiModal');
+      if (modal) {
+        modal.classList.remove('hidden');
+        if (typeof window.loadResiFiles === 'function') {
+          window.loadResiFiles();
+        }
+      }
+    };
+
+    window.closeResiModal = function() {
+      const modal = document.getElementById('resiModal');
+      if (modal) modal.classList.add('hidden');
+    };
+
+    window.openPrintResi = function(filename) {
+      if (!filename) return;
+      const card = document.getElementById('checkIncludeCard')?.checked ? '1' : '0';
+      const threshold = document.getElementById('selectResiThreshold')?.value || '180';
+      window.open(`/print-resi?file=${encodeURIComponent(filename)}&card=${card}&threshold=${threshold}`, '_blank');
+    };
+
+    window.directPrintLatestResi = function() {
+      fetch('/api/resi/files')
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.files && data.files.length > 0) {
+            const latest = data.files[0].filename;
+            const card = document.getElementById('checkIncludeCard')?.checked ? '1' : '0';
+            const threshold = document.getElementById('selectResiThreshold')?.value || '180';
+            window.open(`/print-resi?file=${encodeURIComponent(latest)}&card=${card}&threshold=${threshold}&auto=1`, '_blank');
+          } else {
+            alert('Belum ada file resi PDF di folder resi/. Silakan download label dari Shopee Seller terlebih dahulu.');
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          alert('Gagal mengambil daftar resi terbaru: ' + err.message);
+        });
+    };
+  </script>
+
+  <!-- Core App Logic -->
+  <script is:inline src="/app.js?v=20261124"></script>
+</Layout>

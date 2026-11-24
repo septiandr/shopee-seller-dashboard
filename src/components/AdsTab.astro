@@ -1,0 +1,206 @@
+---
+import { 
+  Target, 
+  RefreshCw, 
+  CreditCard, 
+  Wallet, 
+  ShoppingCart, 
+  Zap, 
+  Percent, 
+  UserCheck, 
+  BarChart2, 
+  Activity, 
+  Layers 
+} from 'lucide-astro';
+---
+
+<div id="tabContentAds" class="space-y-6 hidden">
+  
+  <!-- Top Action Bar for Ads -->
+  <div class="flex flex-wrap items-center justify-between gap-3 p-4 rounded-2xl bg-amber-50 border border-amber-200">
+    <div>
+      <h2 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+        <Target class="w-4 h-4 text-amber-600" />
+        Evaluasi Efektivitas Iklan Shopee (GMV Max ROAS)
+      </h2>
+      <p class="text-xs text-slate-600">Data tersinkron otomatis dari file CSV di folder <code class="text-amber-800 font-semibold font-mono text-[11px]">~/Downloads/iklan/</code>.</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <a href="https://seller.shopee.co.id/portal/marketing/pas/index?source_page_id=1&view_mode=classic&type=new_cpc_homepage" 
+         target="_blank" 
+         rel="noopener noreferrer" 
+         onclick="openShopeePage('ads', event)"
+         class="btn-tactile flex items-center gap-2 ps-3 pe-4 py-2 text-xs font-bold rounded-lg bg-orange-600 text-white hover:bg-orange-700 shadow-sm shadow-orange-500/25"
+         title="Buka Halaman Iklan Shopee di Brave Browser (Profile: sdrisanggalih)">
+        <Target class="w-4 h-4" />
+        <span>Buka Shopee Iklan (Brave)</span>
+      </a>
+      <button onclick="syncAdsData()" class="btn-tactile flex items-center gap-2 ps-3 pe-4 py-2 text-xs font-bold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm">
+        <RefreshCw class="w-4 h-4" id="iconSyncAds" />
+        <span>Sinkronkan Iklan</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Ads KPI Summary Cards -->
+  <section class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
+    
+    <!-- Total Biaya Iklan -->
+    <div class="card-clean p-4 flex flex-col justify-between border-rose-200 bg-rose-50/40">
+      <span class="text-xs text-rose-700 font-bold flex items-center justify-between">
+        <span class="text-[11px] uppercase tracking-wider">Total Biaya Iklan</span>
+        <CreditCard class="w-4 h-4 text-rose-500" />
+      </span>
+      <div class="mt-2">
+        <div class="text-lg sm:text-xl font-bold font-mono-num text-rose-600" id="adsTotalSpend">Rp 0</div>
+        <p class="text-[10px] text-slate-500 mt-0.5" id="adsCampaignCount">0 Laporan</p>
+      </div>
+    </div>
+
+    <!-- Omzet dari Iklan -->
+    <div class="card-clean p-4 flex flex-col justify-between border-blue-200 bg-blue-50/30">
+      <span class="text-xs text-blue-700 font-bold flex items-center justify-between">
+        <span class="text-[11px] uppercase tracking-wider">Omzet Iklan (GMV)</span>
+        <Wallet class="w-4 h-4 text-blue-500" />
+      </span>
+      <div class="mt-2">
+        <div class="text-lg sm:text-xl font-bold font-mono-num text-blue-700" id="adsTotalGmv">Rp 0</div>
+        <p class="text-[10px] text-slate-500 mt-0.5">Penjualan Iklan</p>
+      </div>
+    </div>
+
+    <!-- Unit Terjual -->
+    <div class="card-clean p-4 flex flex-col justify-between">
+      <span class="text-xs text-slate-500 font-bold flex items-center justify-between">
+        <span class="text-[11px] uppercase tracking-wider">Produk Terjual</span>
+        <ShoppingCart class="w-4 h-4 text-slate-400" />
+      </span>
+      <div class="mt-2">
+        <div class="text-lg sm:text-xl font-bold font-mono-num text-slate-900" id="adsTotalUnits">0 Unit</div>
+        <p class="text-[10px] text-slate-500 mt-0.5" id="adsTotalConversions">0 Pesanan Konversi</p>
+      </div>
+    </div>
+
+    <!-- ROAS Keseluruhan -->
+    <div class="card-hero-light p-4 flex flex-col justify-between">
+      <span class="text-xs text-amber-800 font-extrabold flex items-center justify-between">
+        <span class="text-[11px] uppercase tracking-wider">ROAS Rata-rata</span>
+        <Zap class="w-4 h-4 text-amber-600" />
+      </span>
+      <div class="mt-2">
+        <div class="text-xl sm:text-2xl font-black font-mono-num text-amber-700" id="adsOverallRoas">0.00x</div>
+        <p class="text-[10px] text-amber-800/80 mt-0.5 font-medium">Efektivitas Biaya Iklan</p>
+      </div>
+    </div>
+
+    <!-- ACOS Keseluruhan -->
+    <div class="card-clean p-4 flex flex-col justify-between">
+      <span class="text-xs text-slate-500 font-bold flex items-center justify-between">
+        <span class="text-[11px] uppercase tracking-wider">ACOS (%)</span>
+        <Percent class="w-4 h-4 text-cyan-500" />
+      </span>
+      <div class="mt-2">
+        <div class="text-lg sm:text-xl font-bold font-mono-num text-slate-800" id="adsOverallAcos">0.0%</div>
+        <p class="text-[10px] text-slate-500 mt-0.5">Biaya / Omzet</p>
+      </div>
+    </div>
+
+    <!-- CPC & CPA -->
+    <div class="card-clean p-4 flex flex-col justify-between">
+      <span class="text-xs text-slate-500 font-bold flex items-center justify-between">
+        <span class="text-[11px] uppercase tracking-wider">Biaya / Konversi</span>
+        <UserCheck class="w-4 h-4 text-emerald-500" />
+      </span>
+      <div class="mt-2">
+        <div class="text-lg sm:text-xl font-bold font-mono-num text-emerald-700" id="adsOverallCpa">Rp 0</div>
+        <p class="text-[10px] text-slate-500 mt-0.5">CPC: <b id="adsOverallCpc" class="text-slate-700 font-mono-num">Rp 0</b></p>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- Visual Charts for Ads -->
+  <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    
+    <!-- 1. ROAS vs Penjualan -->
+    <div class="card-clean p-5">
+      <div class="flex items-center justify-between mb-3">
+        <div>
+          <h2 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+            <BarChart2 class="w-4 h-4 text-amber-500" />
+            Grafik ROAS vs Penjualan yang Didapat
+          </h2>
+          <p class="text-xs text-slate-500">Korelasi level ROAS dan jumlah unit terjual</p>
+        </div>
+        <span class="text-xs px-2.5 py-1 rounded-lg bg-amber-50 text-amber-700 font-bold border border-amber-200">ROAS vs Qty</span>
+      </div>
+      <div class="h-64 relative">
+        <canvas id="adsRoasSalesChart"></canvas>
+      </div>
+    </div>
+
+    <!-- 2. Tren Biaya vs Omzet Iklan per Periode -->
+    <div class="card-clean p-5">
+      <div class="flex items-center justify-between mb-3">
+        <div>
+          <h2 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+            <Activity class="w-4 h-4 text-blue-500" />
+            Tren Performa per Periode Iklan
+          </h2>
+          <p class="text-xs text-slate-500">Perbandingan Biaya Iklan, Omzet GMV, dan ROAS</p>
+        </div>
+        <span class="text-xs px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 font-bold border border-blue-200">Periode History</span>
+      </div>
+      <div class="h-64 relative">
+        <canvas id="adsPeriodTrendChart"></canvas>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- Ads Ledger Table with Target ROAS Setting -->
+  <section class="card-clean overflow-hidden shadow-sm">
+    <div class="px-5 py-4 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 bg-slate-50/50">
+      <div>
+        <h2 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+          <Layers class="w-4 h-4 text-amber-500" />
+          Riwayat Iklan & Evaluasi Target ROAS per Produk
+        </h2>
+        <p class="text-xs text-slate-500">Ketik angka Target ROAS pada baris produk untuk langsung mengevaluasi ketercapaian</p>
+      </div>
+
+      <!-- Filter Periode Iklan -->
+      <div class="flex items-center gap-2">
+        <select id="filterAdsPeriod" onchange="loadAdsData()" class="text-xs bg-white border border-slate-200 text-slate-700 rounded-lg px-3 py-2 outline-none focus:border-amber-500 shadow-sm">
+          <option value="all">Semua Periode Iklan</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse text-xs">
+        <thead>
+          <tr class="border-b border-slate-200 bg-slate-100 text-slate-700 font-bold uppercase tracking-wider text-[11px]">
+            <th class="py-3.5 px-4">Periode Tanggal</th>
+            <th class="py-3.5 px-4">Nama Produk & Campaign</th>
+            <th class="py-3.5 px-3 text-center">Tayangan / Klik</th>
+            <th class="py-3.5 px-3 text-center">CTR</th>
+            <th class="py-3.5 px-4 text-right">Biaya Iklan</th>
+            <th class="py-3.5 px-4 text-right">Omzet GMV</th>
+            <th class="py-3.5 px-3 text-center">Unit</th>
+            <th class="py-3.5 px-3 text-center">ROAS Real</th>
+            <th class="py-3.5 px-4 text-center">Target ROAS</th>
+            <th class="py-3.5 px-3 text-center">Evaluasi Target</th>
+            <th class="py-3.5 px-3 text-center">ACOS</th>
+          </tr>
+        </thead>
+        <tbody id="adsTableBody" class="divide-y divide-slate-200 text-slate-800 bg-white">
+          <tr>
+            <td colspan="11" class="py-8 text-center text-slate-400">Memuat data iklan...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</div>

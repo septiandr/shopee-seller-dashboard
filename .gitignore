@@ -31,3 +31,9 @@ env/
 # Uploads directory
 uploads/*
 !uploads/.gitkeep
+
+# Node, Bun & Astro
+node_modules/
+.astro/
+bun.lockb
+

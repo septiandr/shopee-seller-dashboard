@@ -1,0 +1,311 @@
+---
+import { 
+  Printer, 
+  X, 
+  Bluetooth, 
+  ExternalLink, 
+  RefreshCw, 
+  UploadCloud, 
+  Receipt, 
+  Upload, 
+  FileSpreadsheet, 
+  Loader, 
+  Sliders, 
+  Box, 
+  Folder, 
+  PlusCircle 
+} from 'lucide-astro';
+---
+
+<!-- Modal Pusat Cetak Resi (Thermal BLE Integration) -->
+<div id="resiModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl max-w-4xl w-full p-6 space-y-4 shadow-2xl border border-slate-200 max-h-[90vh] flex flex-col modal-contain">
+    <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+      <div>
+        <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+          <Printer class="w-5 h-5 text-indigo-600" />
+          Pusat Cetak Resi Shopee (Thermal Bluetooth BLE)
+        </h3>
+        <p class="text-xs text-slate-500 mt-0.5">Integrasi langsung ke printer thermal ESC/POS via platform resi-printer.</p>
+      </div>
+      <button onclick="closeResiModal()" class="text-slate-400 hover:text-slate-700">
+        <X class="w-5 h-5" />
+      </button>
+    </div>
+
+    <!-- Resi Server & Device Status Banner -->
+    <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
+          <Bluetooth class="w-5 h-5" />
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-bold text-slate-900" id="resiDeviceLabel">RPP02N (Bluetooth Thermal)</span>
+            <span id="resiStatusBadge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span> Online (Port 8137)
+            </span>
+          </div>
+          <p class="text-[11px] text-slate-500 mt-0.5">Lebar Kertas: <strong id="resiPaperWidth">80mm (576 dots)</strong> | Auto Dither: Aktif</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button onclick="openResiWebUI()" class="btn-tactile ps-2.5 pe-3.5 py-1.5 font-bold rounded-lg bg-white text-indigo-700 border border-indigo-200 hover:bg-indigo-50 shadow-sm flex items-center gap-1.5" title="Buka tampilan web resi-printer di port 8137">
+          <ExternalLink class="w-3.5 h-3.5" />
+          <span>Buka Web Resi</span>
+        </button>
+        <button onclick="loadResiFiles()" class="btn-tactile ps-2.5 pe-3.5 py-1.5 font-semibold rounded-lg bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 shadow-sm flex items-center gap-1.5" title="Refresh daftar file resi">
+          <RefreshCw class="w-3.5 h-3.5" id="iconResiRefresh" />
+          <span>Refresh</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Upload New Resi PDF -->
+    <div class="flex items-center gap-3 p-3 rounded-xl border border-dashed border-indigo-300 bg-indigo-50/50">
+      <UploadCloud class="w-5 h-5 text-indigo-500 shrink-0" />
+      <div class="flex-1 text-xs">
+        <span class="font-bold text-slate-900 block">Upload File Resi PDF Baru</span>
+        <span class="text-slate-500 text-[11px]">Download label resi dari Shopee Seller lalu upload di sini untuk dicetak via BLE.</span>
+      </div>
+      <input type="file" id="inputUploadResi" accept=".pdf" class="hidden" onchange="uploadResiFile(event)">
+      <button onclick="document.getElementById('inputUploadResi').click()" class="btn-tactile px-3 py-1.5 font-bold rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm text-xs">
+        Pilih File PDF
+      </button>
+    </div>
+
+    <!-- Checkbox Pilihan Kartu Bintang 5 di Bawah Resi & Pengaturan Kegelapan -->
+    <div class="flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl bg-amber-50/90 border border-amber-200 text-xs shadow-xs">
+      <label class="flex items-center gap-2.5 cursor-pointer font-bold text-slate-900 select-none">
+        <input type="checkbox" id="checkIncludeCard" checked class="w-4 h-4 rounded text-amber-600 focus:ring-amber-500 border-slate-300 accent-amber-600">
+        <span class="flex items-center gap-1.5">
+          <span>⭐ Sertakan Kartu Bintang 5 di Bawah Resi (Garis Sobek Otomatis)</span>
+        </span>
+      </label>
+
+      <div class="flex items-center gap-2">
+        <label for="selectResiThreshold" class="font-bold text-slate-700 whitespace-nowrap">Gelap &ge;:</label>
+        <select id="selectResiThreshold" class="text-xs py-1 px-2 font-bold rounded-lg border border-amber-300 bg-white text-slate-800 shadow-2xs">
+          <option value="80">80 - Lebih terang</option>
+          <option value="128">128 - Standar</option>
+          <option value="180" selected>180 - Lebih pekat & tajam (Default)</option>
+          <option value="210">210 - Pekat sekali</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Table of Resi Files -->
+    <div class="flex-1 overflow-y-auto border border-slate-200 rounded-xl">
+      <table class="w-full text-left text-xs">
+        <thead class="bg-slate-50 border-b border-slate-200 sticky top-0 text-[11px] font-bold text-slate-600 uppercase tracking-wider">
+          <tr>
+            <th class="py-2.5 px-3">File Resi</th>
+            <th class="py-2.5 px-3">No. Resi SPX</th>
+            <th class="py-2.5 px-3">No. Pesanan</th>
+            <th class="py-2.5 px-3">Penerima</th>
+            <th class="py-2.5 px-3 text-center">Hal</th>
+            <th class="py-2.5 px-3 text-right">Aksi Cetak</th>
+          </tr>
+        </thead>
+        <tbody id="resiFilesTableBody" class="divide-y divide-slate-100">
+          <tr>
+            <td colspan="6" class="py-6 text-center text-slate-400">Memuat daftar resi...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="flex justify-between items-center pt-2 border-t border-slate-100 text-xs">
+      <span class="text-slate-500" id="resiFilesSummary">0 file resi tersedia di folder resi/</span>
+      <div class="flex gap-2">
+        <a href="/thermal-card" target="_blank" class="btn-tactile px-3 py-2 text-xs font-semibold rounded-lg bg-white text-slate-700 border border-slate-200 hover:bg-slate-50">
+          Stiker Ucapan Thermal
+        </a>
+        <button onclick="closeResiModal()" class="btn-tactile px-4 py-2 text-xs font-semibold rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700">
+          Tutup
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Detail Modal: Rincian Lengkap & Shopee Waterfall Deductions -->
+<div id="detailModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+  <div class="bg-white max-w-xl w-full p-6 space-y-4 rounded-2xl border border-slate-200 shadow-2xl max-h-[90vh] overflow-y-auto modal-contain">
+    <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+      <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+        <Receipt class="w-5 h-5 text-amber-500" />
+        Rincian Transaksi & Potongan Shopee
+      </h3>
+      <button onclick="closeDetailModal()" class="text-slate-400 hover:text-slate-700">
+        <X class="w-5 h-5" />
+      </button>
+    </div>
+    <div id="detailModalContent" class="space-y-4 text-xs text-slate-800"></div>
+    <div class="pt-3 border-t border-slate-100 flex justify-end">
+      <button onclick="closeDetailModal()" class="btn-tactile px-4 py-2 text-xs font-semibold rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<!-- Upload Modal -->
+<div id="uploadModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+  <div class="bg-white max-w-md w-full p-6 space-y-4 rounded-2xl border border-slate-200 shadow-2xl modal-contain">
+    <div class="flex items-center justify-between">
+      <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+        <Upload class="w-5 h-5 text-amber-500" />
+        Upload File Excel / CSV
+      </h3>
+      <button onclick="closeUploadModal()" class="text-slate-400 hover:text-slate-700">
+        <X class="w-5 h-5" />
+      </button>
+    </div>
+    <p class="text-xs text-slate-500">
+      Mendukung file Excel pesanan (<code class="text-amber-600 font-semibold font-mono text-[11px]">.xlsx</code>) dan file CSV performa iklan Shopee (<code class="text-blue-600 font-semibold font-mono text-[11px]">.csv</code>).
+    </p>
+
+    <div id="dropZone" class="border-2 border-dashed border-slate-300 hover:border-amber-500 rounded-xl p-8 text-center cursor-pointer transition bg-slate-50">
+      <FileSpreadsheet class="w-10 h-10 text-amber-500 mx-auto mb-2" />
+      <p class="text-xs font-bold text-slate-800">Klik untuk memilih file atau drop file di sini</p>
+      <p class="text-[11px] text-slate-400 mt-1">Format: Order.all.*.xlsx atau Data+Keseluruhan+Iklan*.csv</p>
+      <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" class="hidden" onchange="handleFileSelect(event)">
+    </div>
+
+    <div id="uploadProgress" class="hidden text-xs text-center py-2 text-amber-600 flex items-center justify-center gap-2 font-semibold">
+      <Loader class="w-4 h-4 animate-spin" />
+      <span>Memproses data file...</span>
+    </div>
+
+    <div class="flex justify-end gap-2 pt-2">
+      <button onclick="closeUploadModal()" class="btn-tactile px-4 py-2 text-xs font-medium text-slate-500 hover:text-slate-800 rounded-lg">Batal</button>
+    </div>
+  </div>
+</div>
+
+<!-- Settings Modal -->
+<div id="settingsModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+  <div class="bg-white max-w-lg w-full p-6 space-y-5 rounded-2xl border border-slate-200 shadow-2xl max-h-[90vh] overflow-y-auto modal-contain">
+    <div class="flex items-center justify-between">
+      <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+        <Sliders class="w-5 h-5 text-amber-500" />
+        Pengaturan HPP & Folder Pantauan
+      </h3>
+      <button onclick="closeSettingsModal()" class="text-slate-400 hover:text-slate-700">
+        <X class="w-5 h-5" />
+      </button>
+    </div>
+
+    <form id="settingsForm" onsubmit="saveSettings(event)" class="space-y-4 text-xs">
+      
+      <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+        <div class="font-bold text-slate-900 flex items-center gap-1.5">
+          <Box class="w-4 h-4 text-amber-500" />
+          Modal Barang (HPP)
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Harga Beli Cover Knalpot</label>
+          <div class="relative">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-mono-num font-bold">Rp</span>
+            <input type="number" id="cfgHppCover" required min="0" step="100" class="w-full bg-white border border-slate-200 rounded-lg pl-10 pr-3 py-2 text-slate-900 font-mono-num font-bold focus:border-amber-500 outline-none shadow-sm">
+          </div>
+          <p class="text-[11px] text-slate-400 mt-0.5">Default: Rp 6.000 / unit</p>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Harga Beli Baut (Per Pasang)</label>
+          <div class="relative">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-mono-num font-bold">Rp</span>
+            <input type="number" id="cfgHppBolt" required min="0" step="100" class="w-full bg-white border border-slate-200 rounded-lg pl-10 pr-3 py-2 text-slate-900 font-mono-num font-bold focus:border-amber-500 outline-none shadow-sm">
+          </div>
+          <p class="text-[11px] text-slate-400 mt-0.5">Default: Rp 2.000 / pasang (otomatis Rp 0 jika varian Tanpa Baut)</p>
+        </div>
+      </div>
+
+      <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+        <div class="font-bold text-slate-900 flex items-center gap-1.5">
+          <Folder class="w-4 h-4 text-blue-500" />
+          Folder Pantauan Otomatis (Auto-Sync)
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Folder Penjualan (Excel Pesanan)</label>
+          <input type="text" id="cfgWatchFolder" required class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-900 font-mono text-[11px] focus:border-amber-500 outline-none shadow-sm">
+          <p class="text-[11px] text-slate-400 mt-0.5">Default: /Users/risanggalih/Downloads/penjualan</p>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Folder Iklan (CSV Iklan Shopee)</label>
+          <input type="text" id="cfgWatchFolderIklan" required class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-900 font-mono text-[11px] focus:border-amber-500 outline-none shadow-sm">
+          <p class="text-[11px] text-slate-400 mt-0.5">Default: /Users/risanggalih/Downloads/iklan</p>
+        </div>
+      </div>
+
+      <div class="pt-2 flex justify-end gap-2">
+        <button type="button" onclick="closeSettingsModal()" class="btn-tactile px-4 py-2 text-xs font-semibold text-slate-500 hover:text-slate-800 rounded-lg">Batal</button>
+        <button type="submit" class="btn-tactile px-4 py-2 text-xs font-bold rounded-lg bg-amber-500 text-white hover:bg-amber-600 shadow-sm shadow-amber-500/25">Simpan Pengaturan</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Tambah / Edit Biaya Pengeluaran -->
+<div id="expenseModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+  <div class="bg-white max-w-md w-full p-6 space-y-4 rounded-2xl border border-slate-200 shadow-2xl modal-contain">
+    <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+      <h3 class="text-base font-bold text-slate-900 flex items-center gap-2" id="expenseModalTitle">
+        <PlusCircle class="w-5 h-5 text-emerald-600" />
+        <span>Catat Biaya Pengeluaran Baru</span>
+      </h3>
+      <button onclick="closeExpenseModal()" class="text-slate-400 hover:text-slate-700">
+        <X class="w-5 h-5" />
+      </button>
+    </div>
+
+    <form id="expenseForm" onsubmit="handleSaveExpense(event)" class="space-y-3.5 text-xs">
+      <input type="hidden" id="expId" value="">
+
+      <div>
+        <label class="block font-semibold text-slate-700 mb-1">Tanggal Pengeluaran</label>
+        <input type="date" id="expDate" required class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-900 font-mono text-xs focus:border-amber-500 outline-none shadow-sm">
+      </div>
+
+      <div>
+        <label class="block font-semibold text-slate-700 mb-1">Kategori Biaya</label>
+        <select id="expCategory" required class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-900 text-xs focus:border-amber-500 outline-none shadow-sm">
+          <option value="Iklan / Ads">Iklan / Ads Shopee</option>
+          <option value="Bahan Packing">Bahan Packing (Bubble Wrap / Lakban / Plastik)</option>
+          <option value="Operasional & Toko">Operasional & Toko (Listrik, Internet, Sewa)</option>
+          <option value="Logistik & Transport">Logistik & Transport (Bensin, Parkir Drop Counter)</option>
+          <option value="Gaji & Upah">Gaji & Upah Tenaga Bantu / Packing</option>
+          <option value="Retur & Ganti Rugi">Retur, Kompensasi & Rusak</option>
+          <option value="Lain-lain">Lain-lain</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block font-semibold text-slate-700 mb-1">Nama / Deskripsi Biaya</label>
+        <input type="text" id="expTitle" required placeholder="Contoh: Top up saldo iklan Shopee Rp 200rb" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-900 text-xs focus:border-amber-500 outline-none shadow-sm placeholder:text-slate-400">
+      </div>
+
+      <div>
+        <label class="block font-semibold text-slate-700 mb-1">Nominal Biaya (Rp)</label>
+        <div class="relative">
+          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-mono-num font-bold">Rp</span>
+          <input type="number" id="expAmount" required min="100" step="100" placeholder="0" class="w-full bg-white border border-slate-200 rounded-lg pl-10 pr-3 py-2 text-slate-900 font-mono-num font-bold text-sm focus:border-amber-500 outline-none shadow-sm">
+        </div>
+      </div>
+
+      <div>
+        <label class="block font-semibold text-slate-700 mb-1">Catatan Tambahan (Opsional)</label>
+        <textarea id="expNotes" rows="2" placeholder="Contoh: Saldo iklan Shopee akun utama, promo Gajian Sale" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-900 text-xs focus:border-amber-500 outline-none shadow-sm placeholder:text-slate-400"></textarea>
+      </div>
+
+      <div class="pt-2 flex justify-end gap-2 border-t border-slate-100">
+        <button type="button" onclick="closeExpenseModal()" class="btn-tactile px-4 py-2 text-xs font-semibold text-slate-500 hover:text-slate-800 rounded-lg">Batal</button>
+        <button type="submit" class="btn-tactile px-4 py-2 text-xs font-bold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm">Simpan Biaya</button>
+      </div>
+    </form>
+  </div>
+</div>

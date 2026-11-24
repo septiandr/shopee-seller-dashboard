@@ -1,0 +1,769 @@
+---
+import '../styles/global.css';
+import { Printer, ArrowLeft, ExternalLink, ShieldCheck, AlertTriangle } from 'lucide-astro';
+---
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cetak Resi Thermal 80mm - Toko Zera</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      /* better-ui: Exact 3-layer transparent elevation shadows */
+      --shadow-control:
+        0px 0px 0px 1px rgba(15, 23, 42, 0.06),
+        0px 1px 3px 0px rgba(15, 23, 42, 0.05),
+        0px 6px 16px -2px rgba(15, 23, 42, 0.04);
+      --shadow-paper:
+        0px 0px 0px 1px rgba(15, 23, 42, 0.08),
+        0 12px 28px -4px rgba(15, 23, 42, 0.12),
+        0 4px 10px -2px rgba(15, 23, 42, 0.06);
+      --shadow-btn:
+        0px 1px 2px 0px rgba(15, 23, 42, 0.12),
+        0px 2px 6px 0px rgba(15, 23, 42, 0.08);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #f1f5f9;
+      color: #0f172a;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 12px 48px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .font-mono-num {
+      font-family: 'Space Grotesk', monospace;
+      font-variant-numeric: tabular-nums lining-nums;
+    }
+
+    /* Top Controls Bar (Hidden during print) */
+    .controls-bar {
+      background: #ffffff;
+      border: 1px solid transparent;
+      border-radius: 20px; /* Concentric radius: inner 8px + padding 14px */
+      padding: 16px 20px;
+      max-width: 860px;
+      width: 100%;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-control);
+    }
+
+    .controls-row-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .title-group h1 {
+      font-size: 16px;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: -0.015em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .title-group p {
+      font-size: 11px;
+      color: #64748b;
+      margin-top: 3px;
+    }
+
+    .action-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Tactile Buttons (better-ui exact scale 0.96 over 150ms ease-out) */
+    .btn-tactile {
+      -webkit-tap-highlight-color: transparent;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 150ms ease-out, background-color 150ms ease-out, border-color 150ms ease-out, box-shadow 150ms ease-out;
+    }
+    @media (prefers-reduced-motion: no-preference) {
+      .btn-tactile:not(:disabled):active {
+        transform: scale(0.96);
+      }
+    }
+
+    .btn-print {
+      background: #0f172a;
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 800;
+      padding-block: 9px;
+      padding-inline-start: 14px; /* Optical alignment: icon side less padding */
+      padding-inline-end: 18px;
+      border-radius: 10px;
+      border: 1px solid transparent;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      box-shadow: var(--shadow-btn);
+    }
+
+    @media (hover: hover) {
+      .btn-print:hover {
+        background: #1e293b;
+      }
+    }
+
+    .btn-back {
+      background: #ffffff;
+      color: #334155;
+      border: 1px solid #cbd5e1;
+      font-size: 12px;
+      font-weight: 700;
+      padding-block: 8px;
+      padding-inline: 14px;
+      border-radius: 8px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    @media (hover: hover) {
+      .btn-back:hover {
+        background: #f8fafc;
+        border-color: #94a3b8;
+      }
+    }
+
+    .btn-resi-web {
+      background: #eef2ff;
+      color: #4338ca;
+      border: 1px solid #c7d2fe;
+      font-size: 12px;
+      font-weight: 700;
+      padding-block: 8px;
+      padding-inline-start: 12px; /* Optical alignment: icon side less padding */
+      padding-inline-end: 16px;
+      border-radius: 8px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    @media (hover: hover) {
+      .btn-resi-web:hover {
+        background: #e0e7ff;
+        border-color: #a5b4fc;
+        color: #3730a3;
+      }
+    }
+
+    /* Options Settings Row */
+    .controls-row-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .toggle-card-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #0f172a;
+      cursor: pointer;
+      background: #fffbeb;
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid #fde68a;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      transition: background-color 150ms ease-out, border-color 150ms ease-out;
+    }
+
+    @media (hover: hover) {
+      .toggle-card-label:hover {
+        background: #fef3c7;
+      }
+    }
+
+    .toggle-card-label input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: #d97706;
+      cursor: pointer;
+    }
+
+    .select-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .select-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .select-control {
+      font-size: 12px;
+      font-weight: 700;
+      color: #0f172a;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 6px 10px;
+      outline: none;
+      transition: border-color 150ms ease-out, box-shadow 150ms ease-out;
+    }
+
+    .select-control:focus {
+      border-color: #0f172a;
+      box-shadow: 0 0 0 1px #0f172a;
+    }
+
+    /* 80mm Thermal Stage */
+    .thermal-stage {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      padding: 10px 0 40px 0;
+    }
+
+    /* The Paper Representation (better-ui elevation & outline) */
+    .paper-80mm {
+      width: 80mm;
+      background: #ffffff;
+      border: 1px solid transparent;
+      box-shadow: var(--shadow-paper);
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .paper-80mm img {
+      width: 100%;
+      height: auto;
+      display: block;
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: crisp-edges;
+      outline: 1px solid rgba(0, 0, 0, 0.08); /* better-ui image outline */
+      outline-offset: -1px;
+    }
+
+    .loading-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(2px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: #0f172a;
+      z-index: 10;
+    }
+
+    /* Scanner Banner */
+    .scanner-banner {
+      margin-top: 14px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .scanner-banner.safe {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      color: #166534;
+    }
+
+    .scanner-banner.warning {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #991b1b;
+    }
+
+    .scanner-status-text {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .scanner-status-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .scanner-banner.safe .scanner-status-badge {
+      background: #dcfce7;
+      color: #15803d;
+    }
+
+    .scanner-banner.warning .scanner-status-badge {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    .toggle-skip-dup {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .toggle-skip-dup input {
+      accent-color: #dc2626;
+      cursor: pointer;
+    }
+
+    /* Duplicate Page Overlay & Styling */
+    .duplicate-warning-banner {
+      background: #fff1f2;
+      border: 2px dashed #e11d48;
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin: 10px 12px;
+      color: #881337;
+      text-align: left;
+    }
+
+    .dup-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-weight: 800;
+      font-size: 13px;
+      color: #be123c;
+    }
+
+    .dup-detail {
+      font-size: 11px;
+      margin-top: 6px;
+      line-height: 1.4;
+      color: #4c0519;
+    }
+
+    .btn-force-page {
+      background: #be123c;
+      color: #ffffff;
+      border: none;
+      border-radius: 6px;
+      padding: 5px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    @media (hover: hover) {
+      .btn-force-page:hover {
+        background: #9f1239;
+      }
+    }
+
+    .btn-force-page.active-forced {
+      background: #475569;
+    }
+
+    .paper-page.is-duplicate-skipped {
+      opacity: 0.60;
+      filter: grayscale(1);
+      position: relative;
+    }
+
+    .page-separator {
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f1f5f9;
+      color: #64748b;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      border-top: 2px dashed #cbd5e1;
+      border-bottom: 2px dashed #cbd5e1;
+      user-select: none;
+      margin: 8px 0;
+    }
+
+    .paper-page {
+      width: 100%;
+      position: relative;
+    }
+
+    .paper-page img {
+      width: 100%;
+      display: block;
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: crisp-edges;
+    }
+
+    /* Accessibility: Reduced Motion (better-ui) */
+    @media (prefers-reduced-motion: reduce) {
+      *, ::before, ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+        transform: none !important;
+      }
+    }
+
+    /* PRINT STYLES FOR 80mm THERMAL PRINTER */
+    @media print {
+      @page {
+        size: 80mm auto;
+        margin: 0;
+      }
+
+      body {
+        background: #ffffff !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 80mm !important;
+      }
+
+      .no-print {
+        display: none !important;
+      }
+
+      /* HILANGKAN RESI DUPLIKAT DARI HASIL CETAK FISIK */
+      .paper-page.is-duplicate-skipped {
+        display: none !important;
+      }
+
+      .thermal-stage {
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+
+      .paper-80mm {
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        width: 80mm !important;
+        max-width: 80mm !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+
+      .paper-page {
+        page-break-after: always !important;
+        break-after: page !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+
+      .paper-page:last-child {
+        page-break-after: avoid !important;
+        break-after: avoid !important;
+      }
+
+      .paper-page img {
+        width: 100% !important;
+        display: block !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Controls Bar -->
+  <div class="controls-bar no-print">
+    <div class="controls-row-top">
+      <div class="title-group">
+        <h1>🖨️ Cetak Resi Thermal 80mm + Thanks Card</h1>
+        <p id="resiSubTitle">File: <strong id="lblFilename">Memuat...</strong> | Format: <strong>80mm Roll (1 Resi + 1 Thanks Card 80×20 mm per Label)</strong></p>
+      </div>
+
+      <div class="action-group">
+        <a href="/" class="btn-back btn-tactile">← Dashboard</a>
+        <a href="http://127.0.0.1:8137" target="_blank" class="btn-resi-web btn-tactile" title="Buka Resi Web UI (Platform Bluetooth di port 8137)">
+          <ExternalLink class="w-3.5 h-3.5" />
+          <span>Buka Resi Web (Port 8137)</span>
+        </a>
+        <button onclick="window.print()" class="btn-print btn-tactile" title="Cetak langsung ke printer 80mm (Tekan Enter)">
+          <Printer class="w-4 h-4 stroke-[2.5]" />
+          <span>Cetak / Print Sekarang (Enter)</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Options Row -->
+    <div class="controls-row-bottom">
+      <label class="toggle-card-label" title="Centang untuk mencetak 1 Resi + 1 Thanks Card (80 x 20 mm) tersambung di bawah">
+        <input type="checkbox" id="checkCard" checked onchange="updatePreview()">
+        <span>⭐ Sertakan Thanks Card (80 × 20 mm) di Bawah Tiap Resi</span>
+      </label>
+
+      <div class="select-group">
+        <span class="select-label">Desain Kartu:</span>
+        <select id="selectStyle" class="select-control" onchange="updatePreview()">
+          <option value="1" selected>Desain 1: Hero Banner (Rekomendasi)</option>
+          <option value="2">Desain 2: Swiss Editorial</option>
+          <option value="3">Desain 3: Voucher Ticket</option>
+        </select>
+
+        <span class="select-label" style="margin-left: 6px;">Gelap &ge;:</span>
+        <select id="selectThreshold" class="select-control" onchange="updatePreview()">
+          <option value="128">128 - Standar</option>
+          <option value="160">160 - Sedang</option>
+          <option value="180" selected>180 - Pekat & Tajam (Default)</option>
+          <option value="200">200 - Sangat Pekat</option>
+          <option value="220">220 - Maksimal</option>
+        </select>
+
+        <span class="select-label" style="margin-left: 6px;">Tampilan:</span>
+        <select id="selectPage" class="select-control" onchange="updatePreview()">
+          <option value="all" selected>Semua Halaman</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Scanner Anti-Double Print Banner -->
+    <div id="scannerBanner" class="scanner-banner safe">
+      <div class="scanner-status-text">
+        <span class="scanner-status-badge" id="scannerBadge">SCANNER ANTI-DOBEL</span>
+        <span id="scannerMsg">Memindai resi untuk mendeteksi nomor ganda/duplikat...</span>
+      </div>
+      <label class="toggle-skip-dup" title="Otomatis lewati halaman resi yang kembar agar tidak tercetak dua kali">
+        <input type="checkbox" id="checkSkipDup" checked onchange="updatePreview()">
+        <span>🛡️ Lewati Resi Duplikat Otomatis</span>
+      </label>
+    </div>
+  </div>
+
+  <!-- Thermal Paper 80mm Roll Container -->
+  <div class="thermal-stage">
+    <div class="paper-80mm" id="paperContainer">
+      <div class="loading-overlay" id="loadingOverlay">Memuat render 80mm...</div>
+      <div id="paperPagesContainer"></div>
+    </div>
+  </div>
+
+  <script is:inline>
+    const params = new URLSearchParams(window.location.search);
+    const filename = params.get('file') || 'BT-4.pdf';
+    const initialCard = params.get('card') !== '0';
+    const initialThreshold = params.get('threshold') || '180';
+    const initialStyle = params.get('style') || '1';
+
+    document.getElementById('lblFilename').textContent = filename;
+    document.getElementById('checkCard').checked = initialCard;
+    document.getElementById('selectThreshold').value = initialThreshold;
+    document.getElementById('selectStyle').value = initialStyle;
+
+    let totalPages = 1;
+    let scanData = { has_duplicates: false, duplicate_pages: [], pages: [] };
+    const forcedPages = new Set(); // Pages user explicitly overrides to print
+
+    // Scan duplicates and load available pages count for this resi
+    async function initPageList() {
+      try {
+        // 1. Scan for duplicates via API
+        const scanRes = await fetch(`/api/resi/scan/${encodeURIComponent(filename)}`);
+        if (scanRes.ok) {
+          scanData = await scanRes.json();
+          renderScannerStatus();
+        }
+
+        // 2. Load file info
+        const res = await fetch('/api/resi/files');
+        const data = await res.json();
+        const cur = (data.files || []).find(f => f.filename === filename);
+        if (cur) {
+          totalPages = Math.max(1, cur.pages || 1);
+          document.getElementById('lblFilename').textContent = `${filename} (${totalPages} Label)`;
+          
+          const sel = document.getElementById('selectPage');
+          sel.innerHTML = '';
+          
+          const optAll = document.createElement('option');
+          optAll.value = 'all';
+          optAll.textContent = `Semua Halaman (${totalPages} Label)`;
+          optAll.selected = true;
+          sel.appendChild(optAll);
+
+          if (totalPages > 1) {
+            for (let p = 1; p <= totalPages; p++) {
+              const opt = document.createElement('option');
+              opt.value = p;
+              const pMeta = (scanData.pages || []).find(pg => pg.page === p);
+              const dupTag = (pMeta && pMeta.is_duplicate) ? ' ⚠️ [DUPLIKAT]' : '';
+              opt.textContent = `Halaman ${p}${dupTag}`;
+              sel.appendChild(opt);
+            }
+          }
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function renderScannerStatus() {
+      const banner = document.getElementById('scannerBanner');
+      const badge = document.getElementById('scannerBadge');
+      const msg = document.getElementById('scannerMsg');
+
+      if (scanData.has_duplicates) {
+        banner.className = 'scanner-banner warning';
+        badge.textContent = '⚠️ DUPLIKAT DITEMUKAN';
+        const dupPagesList = scanData.duplicate_pages.map(p => `Hal ${p}`).join(', ');
+        msg.innerHTML = `Terdeteksi <strong>${scanData.duplicate_count} resi kembar</strong> (${dupPagesList})! Otomatis dilewati agar tidak ter-print double.`;
+      } else {
+        banner.className = 'scanner-banner safe';
+        badge.textContent = '✓ 100% AMAN';
+        msg.textContent = `Semua resi unik. Tidak ada nomor resi atau pesanan yang kembar/ganda.`;
+      }
+    }
+
+    function toggleForcePage(pageNum) {
+      if (forcedPages.has(pageNum)) {
+        forcedPages.delete(pageNum);
+      } else {
+        forcedPages.add(pageNum);
+      }
+      updatePreview();
+    }
+
+    function updatePreview() {
+      const card = document.getElementById('checkCard').checked ? 1 : 0;
+      const style = document.getElementById('selectStyle').value || 1;
+      const threshold = document.getElementById('selectThreshold').value;
+      const pageSelection = document.getElementById('selectPage').value || 'all';
+      const skipDup = document.getElementById('checkSkipDup').checked;
+      
+      const container = document.getElementById('paperPagesContainer');
+      const overlay = document.getElementById('loadingOverlay');
+      overlay.style.display = 'flex';
+
+      const pagesToRender = pageSelection === 'all' 
+        ? Array.from({ length: totalPages }, (_, i) => i + 1)
+        : [parseInt(pageSelection, 10)];
+
+      container.innerHTML = '';
+      let loadedCount = 0;
+      const totalToLoad = pagesToRender.length;
+
+      pagesToRender.forEach((p, idx) => {
+        const pMeta = (scanData.pages || []).find(pg => pg.page === p) || {};
+        const isDuplicate = Boolean(pMeta.is_duplicate);
+        const isForced = forcedPages.has(p);
+        const shouldSkip = isDuplicate && skipDup && !isForced;
+
+        if (idx > 0) {
+          const sep = document.createElement('div');
+          sep.className = 'page-separator no-print';
+          sep.textContent = `✂ PEMBATAS ANTAR RESI (HALAMAN ${p}) ✂`;
+          container.appendChild(sep);
+        }
+
+        const pageWrap = document.createElement('div');
+        pageWrap.className = 'paper-page' + (shouldSkip ? ' is-duplicate-skipped' : '');
+        pageWrap.id = `pageWrap_${p}`;
+
+        // Jika halaman ini terdeteksi duplikat, tampilkan kotak peringatan
+        if (isDuplicate) {
+          const dupBox = document.createElement('div');
+          dupBox.className = 'duplicate-warning-banner no-print';
+          dupBox.innerHTML = `
+            <div class="dup-header">
+              <span>${shouldSkip ? '🚫 RESI DUPLIKAT DILEWATI (ANTI-DOUBLE PRINT)' : '⚠️ RESI DUPLIKAT (CETAK DIPAKSAKAN)'}</span>
+              <button class="btn-force-page btn-tactile ${isForced ? 'active-forced' : ''}" onclick="toggleForcePage(${p})">
+                ${isForced ? 'Batalkan Paksa' : 'Tetap Cetak Halaman Ini'}
+              </button>
+            </div>
+            <div class="dup-detail">
+              <strong>Penyebab:</strong> ${pMeta.duplicate_reason || 'Nomor resi sama dengan halaman sebelumnya'}<br>
+              <strong>Penerima:</strong> ${pMeta.recipient} | <strong>No. Resi:</strong> ${pMeta.tracking_no}
+            </div>
+          `;
+          pageWrap.appendChild(dupBox);
+        }
+
+        const img = document.createElement('img');
+        img.alt = `Resi Hal ${p}`;
+        img.src = `/api/resi/image/${encodeURIComponent(filename)}?card=${card}&style=${style}&threshold=${threshold}&page=${p}&dots=576&_t=${Date.now()}`;
+        
+        img.onload = () => {
+          loadedCount++;
+          if (loadedCount >= totalToLoad) {
+            overlay.style.display = 'none';
+            if (params.get('auto') === '1' && !window.__hasAutoPrinted) {
+              window.__hasAutoPrinted = true;
+              setTimeout(() => window.print(), 350);
+            }
+          }
+        };
+        img.onerror = () => {
+          loadedCount++;
+          if (loadedCount >= totalToLoad) {
+            overlay.style.display = 'none';
+          }
+        };
+
+        pageWrap.appendChild(img);
+        container.appendChild(pageWrap);
+      });
+    }
+
+    // Keyboard shortcut Enter to print immediately
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        window.print();
+      }
+    });
+
+    initPageList().then(() => {
+      updatePreview();
+    });
+  </script>
+</body>
+</html>

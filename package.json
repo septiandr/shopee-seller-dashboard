@@ -1,0 +1,16 @@
+{
+  "name": "shopee-ledger-astro",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "bun --bun astro dev --port 4321",
+    "build": "bun --bun astro build",
+    "preview": "bun --bun astro preview --port 4321"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.5",
+    "astro": "^7.4.13",
+    "lucide-astro": "^0.556.0",
+    "tailwindcss": "^4.3.5"
+  }
+}
