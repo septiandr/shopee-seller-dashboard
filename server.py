@@ -1404,7 +1404,7 @@ def create_thank_you_card(width: int = 576, height: int = 240, shop_name: str = 
     draw.rounded_rectangle([(8, 18), (width - 8, height - 8)], radius=8, outline=0, width=3)
 
     if style == 1:
-        # Style 1: Modern Hero Banner (Rekomendasi - Tulisan Ekstra Besar & Hitam Pekat)
+        # Style 1: Modern Hero Banner (Fokus Reminder Bintang 5 & Terima Kasih - Tulisan Ekstra Besar)
         # Baris 1: Header Brand
         draw.text((22, 28), shop_name, fill=0, font=f_brand)
         draw.text((160, 30), '•  TERIMA KASIH TELAH ORDER!', fill=0, font=f_bold)
@@ -1417,27 +1417,27 @@ def create_thank_you_card(width: int = 576, height: int = 240, shop_name: str = 
         cta_bb = draw.textbbox((0, 0), cta, font=f_title)
         draw.text(((width - (cta_bb[2] - cta_bb[0])) // 2, 115), cta, fill=255, font=f_title)
 
-        # Baris 3: Garansi & Komplain (Huruf Tebal)
-        draw.text((22, 154), 'GARANSI 100% GANTI BARU:', fill=0, font=f_brand)
-        draw.text((22, 180), 'Ada kendala / barang rusak / baut kurang?', fill=0, font=f_sub)
-        draw.text((22, 204), 'JANGAN RATING BURUK DULU! Chat Shopee, kami siap ganti.', fill=0, font=f_bold)
+        # Baris 3: Reminder Bintang 5 & Ucapan Hangat (Huruf Tebal)
+        draw.text((22, 154), 'BINTANG 5 KAKAK SANGAT BERARTI BAGI KAMI!', fill=0, font=f_brand)
+        draw.text((22, 180), 'Semoga paket mendarat aman & puas dengan produknya.', fill=0, font=f_sub)
+        draw.text((22, 204), 'Ditunggu orderan berikutnya! Ada pertanyaan? Chat Shopee kami.', fill=0, font=f_bold)
 
     elif style == 2:
-        # Style 2: Swiss Editorial (Kiri Lega, Kanan Black Badge Garansi)
+        # Style 2: Swiss Editorial (Kiri Lega, Kanan Black Badge Reminder)
         draw.text((22, 28), shop_name, fill=0, font=f_brand)
         draw.text((22, 54), 'TERIMA KASIH TELAH BELANJA!', fill=0, font=f_title)
         draw.text((22, 80), 'Mohon bantu toko kami dengan ulasan:', fill=0, font=f_sub)
         draw.text((22, 102), '★ ★ ★ ★ ★ BINTANG 5 & FOTO', fill=0, font=f_brand)
-        draw.text((22, 134), '100% AMANAH & BERTANGGUNG JAWAB', fill=0, font=f_bold)
-        draw.text((22, 158), 'Chat Shopee kami jika ada kendala barang.', fill=0, font=f_sub)
+        draw.text((22, 134), 'ULASAN ANDA SANGAT BERHARGA', fill=0, font=f_bold)
+        draw.text((22, 158), 'Chat Shopee kami untuk pertanyaan seputar produk.', fill=0, font=f_sub)
 
         rx = 340
         draw.rounded_rectangle([(rx, 26), (width - 16, height - 16)], radius=8, fill=0)
         draw_five_stars_vector(draw, cx=rx + (width - 16 - rx) // 2, cy=56, r_outer=13, r_inner=6, spacing=25, fill=255)
-        draw.text((rx + 16, 86), 'GARANSI GANTI BARU', fill=255, font=f_bold)
-        draw.text((rx + 16, 110), 'Barang rusak/kurang?', fill=255, font=f_sub)
-        draw.text((rx + 16, 134), 'JANGAN NILAI 1-3!', fill=255, font=f_title)
-        draw.text((rx + 16, 162), 'Chat Shopee kami ganti.', fill=255, font=f_sub)
+        draw.text((rx + 16, 86), 'BINTANG 5 & FOTO', fill=255, font=f_bold)
+        draw.text((rx + 16, 110), 'Sangat berarti bagi kami', fill=255, font=f_sub)
+        draw.text((rx + 16, 134), 'TERIMA KASIH BANYAK!', fill=255, font=f_title)
+        draw.text((rx + 16, 162), 'Semoga suka & langganan.', fill=255, font=f_sub)
 
     else:
         # Style 3: Modern Voucher Ticket
@@ -1449,8 +1449,8 @@ def create_thank_you_card(width: int = 576, height: int = 240, shop_name: str = 
         draw.text((45, 120), 'MOHON BANTU BINTANG 5 & FOTO PRODUK YA KAK!', fill=0, font=f_title)
         
         draw.line([(8, 150), (width - 8, 150)], fill=0, width=2)
-        draw.text((22, 160), 'GARANSI 100% GANTI BARU JIKA RUSAK / KURANG', fill=0, font=f_brand)
-        draw.text((22, 188), 'Hubungi chat Shopee sebelum memberi penilaian buruk.', fill=0, font=f_bold)
+        draw.text((22, 160), 'ULASAN POSITIF ANDA SANGAT MEMBANTU KAMI', fill=0, font=f_brand)
+        draw.text((22, 188), 'Terima kasih atas kepercayaannya & ditunggu order selanjutnya!', fill=0, font=f_bold)
         draw.text((22, 210), f'Kunjungi toko: {username}', fill=0, font=f_sub)
 
     return im
